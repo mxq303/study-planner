@@ -17,6 +17,7 @@ import {
 import { Card } from '@/components/ui/Card'
 import { Heatmap } from '@/components/stats/Heatmap'
 import { SubjectBar } from '@/components/stats/SubjectBar'
+import { useI18n } from '@/lib/i18n'
 import { useTaskStore } from '@/stores/taskStore'
 import { usePomodoroStore } from '@/stores/pomodoroStore'
 import { useSubjectStore } from '@/stores/subjectStore'
@@ -24,6 +25,7 @@ import { useSubjectStore } from '@/stores/subjectStore'
 type TimeRange = 'week' | 'month' | 'all'
 
 export default function StatsPage() {
+  const { t } = useI18n()
   const { tasks, loadTasks } = useTaskStore()
   const { sessions, loadSessions } = usePomodoroStore()
   const { subjects, loadSubjects } = useSubjectStore()
@@ -123,22 +125,38 @@ export default function StatsPage() {
   }
   const avgMinutes = Math.round(totalMinutes / Math.max(dayCount, 1))
 
+  const dayLabelKeys = [
+    t.stats.monday,
+    t.stats.tuesday,
+    t.stats.wednesday,
+    t.stats.thursday,
+    t.stats.friday,
+    t.stats.saturday,
+    t.stats.sunday,
+  ]
+
+  const rangeLabels: Record<TimeRange, string> = {
+    week: t.stats.thisWeek,
+    month: t.stats.thisMonth,
+    all: t.stats.allTime,
+  }
+
   return (
     <div className="space-y-4 pb-4">
-      <h1 className="text-lg font-bold">学习统计</h1>
+      <h1 className="text-lg font-bold text-text">{t.stats.title}</h1>
 
       {/* Time range selector */}
-      <div className="flex gap-1 bg-gray-100 rounded-full p-1">
-        {[
-          { key: 'week' as const, label: '本周' },
-          { key: 'month' as const, label: '本月' },
-          { key: 'all' as const, label: '全部' },
-        ].map(item => (
+      <div className="flex gap-1 bg-surface rounded-full p-1">
+        {([
+          { key: 'week' as const, label: t.stats.thisWeek },
+          { key: 'month' as const, label: t.stats.thisMonth },
+          { key: 'all' as const, label: t.stats.allTime },
+        ]).map(item => (
           <button
             key={item.key}
             onClick={() => setRange(item.key)}
             className={`flex-1 py-1.5 rounded-full text-sm font-medium transition ${
-              range === item.key ? 'bg-white text-text shadow-sm' : 'text-text-muted'
+              range === item.key ? 'card-bg text-text shadow-sm' : 'text-text-muted'
             }`}
           >
             {item.label}
@@ -153,8 +171,8 @@ export default function StatsPage() {
             <Flame className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p className="text-xl font-bold">{totalHours}h</p>
-            <p className="text-xs text-text-muted">总学习时长</p>
+            <p className="text-xl font-bold text-text">{totalHours}h</p>
+            <p className="text-xs text-text-muted">{t.stats.totalHours}</p>
           </div>
         </Card>
         <Card className="flex items-center gap-3">
@@ -162,8 +180,8 @@ export default function StatsPage() {
             <CheckCircle className="w-5 h-5 text-success" />
           </div>
           <div>
-            <p className="text-xl font-bold">{tasksCompleted}</p>
-            <p className="text-xs text-text-muted">完成任务</p>
+            <p className="text-xl font-bold text-text">{tasksCompleted}</p>
+            <p className="text-xs text-text-muted">{t.stats.tasksCompleted}</p>
           </div>
         </Card>
         <Card className="flex items-center gap-3">
@@ -171,8 +189,8 @@ export default function StatsPage() {
             <Timer className="w-5 h-5 text-warning" />
           </div>
           <div>
-            <p className="text-xl font-bold">{pomodoroCount}</p>
-            <p className="text-xs text-text-muted">番茄钟数</p>
+            <p className="text-xl font-bold text-text">{pomodoroCount}</p>
+            <p className="text-xs text-text-muted">{t.stats.pomodoroCount}</p>
           </div>
         </Card>
         <Card className="flex items-center gap-3">
@@ -180,23 +198,23 @@ export default function StatsPage() {
             <Zap className="w-5 h-5 text-danger" />
           </div>
           <div>
-            <p className="text-xl font-bold">{streak}天</p>
-            <p className="text-xs text-text-muted">连续学习</p>
+            <p className="text-xl font-bold text-text">{streak}{t.stats.day}</p>
+            <p className="text-xs text-text-muted">{t.stats.currentStreak}</p>
           </div>
         </Card>
       </div>
 
       {/* Weekly heatmap */}
       <Card>
-        <h3 className="text-sm font-medium mb-3">本周学习热力图</h3>
-        <Heatmap data={heatmapData} />
+        <h3 className="text-sm font-medium text-text mb-3">{t.stats.heatmap}</h3>
+        <Heatmap data={heatmapData} dayLabels={dayLabelKeys} />
       </Card>
 
       {/* Subject distribution */}
       <Card>
-        <h3 className="text-sm font-medium mb-3">科目分布</h3>
+        <h3 className="text-sm font-medium text-text mb-3">{t.stats.subjectDistribution}</h3>
         {subjectData.length === 0 ? (
-          <p className="text-sm text-text-muted text-center py-4">暂无数据</p>
+          <p className="text-sm text-text-muted text-center py-4">{t.common.noData}</p>
         ) : (
           <SubjectBar data={subjectData} maxMinutes={maxSubjectMinutes} />
         )}
@@ -204,13 +222,13 @@ export default function StatsPage() {
 
       {/* Daily average */}
       <Card>
-        <h3 className="text-sm font-medium mb-3">每日平均</h3>
+        <h3 className="text-sm font-medium text-text mb-3">{t.stats.dailyAverage}</h3>
         <div className="flex items-end gap-2">
           <span className="text-3xl font-bold text-primary">{avgMinutes}</span>
-          <span className="text-sm text-text-muted pb-1">分钟/天</span>
+          <span className="text-sm text-text-muted pb-1">{t.stats.dailyAverage}</span>
         </div>
         <p className="text-xs text-text-muted mt-1">
-          {range === 'week' ? '本周' : range === 'month' ? '本月' : '全部'}统计
+          {rangeLabels[range]}
         </p>
       </Card>
     </div>

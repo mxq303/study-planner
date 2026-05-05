@@ -6,25 +6,14 @@ import { format, isToday, isTomorrow, differenceInDays, parseISO, startOfDay } f
 import { cn } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { useI18n } from '@/lib/i18n'
 import { useReviewStore } from '@/stores/reviewStore'
 import { useTaskStore } from '@/stores/taskStore'
-import { EBBINGHAUS_STAGES } from '@/types'
 
-function getStageLabel(stage: number): string {
-  const s = EBBINGHAUS_STAGES.find(e => e.stage === stage)
-  return s?.label || `第${stage}阶段`
-}
-
-function getDateLabel(dateStr: string): string {
-  const date = parseISO(dateStr)
-  if (isToday(date)) return '今天'
-  if (isTomorrow(date)) return '明天'
-  const days = differenceInDays(startOfDay(date), startOfDay(new Date()))
-  if (days < 0) return `逾期${Math.abs(days)}天`
-  return `${days}天后`
-}
 
 export default function ReviewsPage() {
+  const { t } = useI18n()
+
   const {
     isLoading,
     loadReminders,
@@ -49,16 +38,29 @@ export default function ReviewsPage() {
   const { streak, rate, total } = getStreakInfo()
 
   const getTaskTitle = (taskId: string) => {
-    return tasks.find(t => t.id === taskId)?.title || '未知任务'
+    return tasks.find(t => t.id === taskId)?.title || '—'
+  }
+
+  const getStageLabel = (stage: number): string => {
+    return t.reviews.stages[stage - 1] || `Stage ${stage}`
+  }
+
+  const getDateLabel = (dateStr: string): string => {
+    const date = parseISO(dateStr)
+    if (isToday(date)) return t.reviews.today
+    if (isTomorrow(date)) return t.reviews.tomorrow
+    const days = differenceInDays(startOfDay(date), startOfDay(new Date()))
+    if (days < 0) return t.reviews.overdue.replace('{0}', String(Math.abs(days)))
+    return t.reviews.daysLater.replace('{0}', String(days))
   }
 
   if (isLoading) {
     return (
       <div className="space-y-4 pb-4">
-        <h1 className="text-lg font-bold">艾宾浩斯复习</h1>
+        <h1 className="text-lg font-bold text-text">{t.reviews.title}</h1>
         <div className="animate-pulse space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-20 bg-gray-100 rounded-2xl" />
+            <div key={i} className="h-20 bg-surface rounded-2xl" />
           ))}
         </div>
       </div>
@@ -67,22 +69,22 @@ export default function ReviewsPage() {
 
   return (
     <div className="space-y-4 pb-4">
-      <h1 className="text-lg font-bold">艾宾浩斯复习</h1>
+      <h1 className="text-lg font-bold text-text">{t.reviews.title}</h1>
 
       {/* Stats card */}
       <Card>
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
             <p className="text-2xl font-bold text-primary">{streak}</p>
-            <p className="text-xs text-text-muted">复习连击</p>
+            <p className="text-xs text-text-muted">{t.reviews.streak}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-success">{Math.round(rate * 100)}%</p>
-            <p className="text-xs text-text-muted">完成率</p>
+            <p className="text-xs text-text-muted">{t.reviews.completionRate}</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-text">{total}</p>
-            <p className="text-xs text-text-muted">总提醒</p>
+            <p className="text-xs text-text-muted">{t.reviews.totalReminders}</p>
           </div>
         </div>
       </Card>
@@ -91,7 +93,7 @@ export default function ReviewsPage() {
       <div>
         <h2 className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
           <span className="w-1.5 h-4 rounded-full bg-danger" />
-          今日待复习
+          {t.reviews.todayReview}
           <span className="text-xs text-text-muted font-normal">
             ({todayReminders.length})
           </span>
@@ -99,8 +101,8 @@ export default function ReviewsPage() {
 
         {todayReminders.length === 0 ? (
           <EmptyState
-            title="暂无待复习内容"
-            description="完成学习任务后将自动生成复习提醒"
+            title={t.reviews.noReview}
+            description={t.reviews.noReviewHint}
           />
         ) : (
           <div className="space-y-2">
@@ -121,7 +123,7 @@ export default function ReviewsPage() {
                     <Check className="w-3.5 h-3.5 text-success opacity-0 group-hover:opacity-100" />
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-sm font-medium truncate text-text">
                       {getTaskTitle(r.taskId)}
                     </p>
                     <p className="text-xs text-text-muted">
@@ -137,7 +139,7 @@ export default function ReviewsPage() {
                     onClick={() => handleComplete(r.id)}
                     className="px-3 py-1.5 bg-primary text-white text-xs rounded-lg font-medium hover:bg-primary-dark transition flex-shrink-0"
                   >
-                    完成
+                    {t.reviews.completeReview}
                   </button>
                 </Card>
               )
@@ -150,7 +152,7 @@ export default function ReviewsPage() {
       <div>
         <h2 className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
           <span className="w-1.5 h-4 rounded-full bg-primary" />
-          即将到来
+          {t.reviews.upcoming}
           <span className="text-xs text-text-muted font-normal">
             ({upcomingReminders.length})
           </span>
@@ -158,8 +160,8 @@ export default function ReviewsPage() {
 
         {upcomingReminders.length === 0 ? (
           <EmptyState
-            title="暂无即将到来的复习"
-            description="未来7天内没有需要复习的内容"
+            title={t.reviews.noReview}
+            description={t.reviews.noReviewHint}
           />
         ) : (
           <div className="space-y-2">
@@ -169,7 +171,7 @@ export default function ReviewsPage() {
                   <span className="text-xs font-bold text-primary">{r.stage}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
+                  <p className="text-sm font-medium truncate text-text">
                     {getTaskTitle(r.taskId)}
                   </p>
                   <p className="text-xs text-text-muted">

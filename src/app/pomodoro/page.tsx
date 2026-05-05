@@ -4,6 +4,7 @@ import { useEffect, useCallback, useState, useRef } from 'react'
 import { Play, Pause, RotateCcw, Timer, Flame } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/Card'
+import { useI18n } from '@/lib/i18n'
 import { usePomodoroStore } from '@/stores/pomodoroStore'
 import { usePreferenceStore } from '@/stores/preferenceStore'
 import { useTaskStore } from '@/stores/taskStore'
@@ -18,6 +19,8 @@ function formatTime(seconds: number): string {
 }
 
 export default function PomodoroPage() {
+  const { t } = useI18n()
+
   const {
     timer,
     startTimer,
@@ -54,7 +57,7 @@ export default function PomodoroPage() {
         if (completed) {
           clearTimer()
           toast.success(
-            timer.mode === 'focus' ? '专注时间结束！休息一下吧 🎉' : '休息时间结束，继续加油！💪'
+            timer.mode === 'focus' ? t.pomodoro.focusComplete : t.pomodoro.breakComplete
           )
           completeSession()
         }
@@ -63,7 +66,7 @@ export default function PomodoroPage() {
       clearTimer()
     }
     return clearTimer
-  }, [timer.isRunning, tick, clearTimer, completeSession, timer.mode])
+  }, [timer.isRunning, tick, clearTimer, completeSession, timer.mode, t.pomodoro.focusComplete, t.pomodoro.breakComplete])
 
   const progress = timer.totalSeconds > 0
     ? ((timer.totalSeconds - timer.secondsLeft) / timer.totalSeconds) * 100
@@ -91,7 +94,6 @@ export default function PomodoroPage() {
     clearTimer()
     const config = usePreferenceStore.getState().getPomodoroConfig()
     const duration = mode === 'focus' ? config.focusMinutes : config.breakMinutes
-    // Manually reset and start new session
     usePomodoroStore.setState({
       timer: {
         isRunning: false,
@@ -126,12 +128,12 @@ export default function PomodoroPage() {
 
   return (
     <div className="space-y-4 pb-4">
-      <h1 className="text-lg font-bold">番茄钟</h1>
+      <h1 className="text-lg font-bold text-text">{t.pomodoro.title}</h1>
 
       {/* Timer display */}
       <Card className="flex flex-col items-center py-8">
         {/* Mode toggle */}
-        <div className="flex gap-1 bg-gray-100 rounded-full p-1 mb-6">
+        <div className="flex gap-1 bg-surface rounded-full p-1 mb-6">
           <button
             onClick={() => handleModeSwitch('focus')}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
@@ -140,7 +142,7 @@ export default function PomodoroPage() {
                 : 'text-text-muted'
             }`}
           >
-            专注
+            {t.pomodoro.focus}
           </button>
           <button
             onClick={() => handleModeSwitch('break')}
@@ -150,7 +152,7 @@ export default function PomodoroPage() {
                 : 'text-text-muted'
             }`}
           >
-            休息
+            {t.pomodoro.break}
           </button>
         </div>
 
@@ -179,11 +181,11 @@ export default function PomodoroPage() {
             />
           </svg>
           <div className="absolute flex flex-col items-center">
-            <span className="text-5xl font-bold tabular-nums tracking-tight">
+            <span className="text-5xl font-bold tabular-nums tracking-tight text-text">
               {formatTime(timer.secondsLeft)}
             </span>
             <span className="text-sm text-text-muted mt-1">
-              第 {timer.currentRound}/{timer.totalRounds} 轮
+              {t.pomodoro.round} {timer.currentRound}/{timer.totalRounds}
             </span>
           </div>
         </div>
@@ -192,7 +194,7 @@ export default function PomodoroPage() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => { clearTimer(); resetTimer() }}
-            className="p-3 rounded-full bg-gray-100 hover:bg-gray-200 transition"
+            className="p-3 rounded-full bg-surface hover:bg-hover transition"
           >
             <RotateCcw className="w-5 h-5 text-text-muted" />
           </button>
@@ -212,15 +214,15 @@ export default function PomodoroPage() {
 
       {/* Task selector */}
       <Card>
-        <label className="block text-sm font-medium mb-2">关联任务</label>
+        <label className="block text-sm font-medium text-text mb-2">{t.pomodoro.selectTask}</label>
         <select
           value={selectedTaskId || ''}
           onChange={e => setSelectedTaskId(e.target.value || null)}
-          className="w-full px-3 py-2 border border-border rounded-xl text-sm bg-white"
+          className="w-full px-3 py-2 border border-border rounded-xl text-sm bg-surface text-text"
         >
-          <option value="">不关联任务</option>
-          {pendingTasks.map(t => (
-            <option key={t.id} value={t.id}>{t.title}</option>
+          <option value="">{t.pomodoro.noTask}</option>
+          {pendingTasks.map(task => (
+            <option key={task.id} value={task.id}>{task.title}</option>
           ))}
         </select>
       </Card>
@@ -244,15 +246,15 @@ export default function PomodoroPage() {
 
       {/* Today's stats */}
       <Card>
-        <h3 className="text-sm font-medium mb-3">今日统计</h3>
+        <h3 className="text-sm font-medium text-text mb-3">{t.pomodoro.todayStats}</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Flame className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-xl font-bold">{todayCompleted}</p>
-              <p className="text-xs text-text-muted">完成番茄钟</p>
+              <p className="text-xl font-bold text-text">{todayCompleted}</p>
+              <p className="text-xs text-text-muted">{t.pomodoro.completed}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -260,8 +262,8 @@ export default function PomodoroPage() {
               <Timer className="w-5 h-5 text-success" />
             </div>
             <div>
-              <p className="text-xl font-bold">{todayMinutes}</p>
-              <p className="text-xs text-text-muted">专注分钟</p>
+              <p className="text-xl font-bold text-text">{todayMinutes}</p>
+              <p className="text-xs text-text-muted">{t.pomodoro.totalFocus}</p>
             </div>
           </div>
         </div>

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #6366f1;
   --color-primary-light: #818cf8;
@@ -14,13 +16,33 @@
   --color-danger: #ef4444;
 }
 
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --hover: #f1f5f9;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+}
+
+.dark {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --text: #f1f5f9;
+  --text-muted: #64748b;
+  --border: #334155;
+  --hover: #1e293b;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: var(--bg);
+  color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -28,6 +50,14 @@ body {
 @layer base {
   button {
     cursor: pointer;
+  }
+  input, select, textarea {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+  }
+  input::placeholder {
+    color: var(--text-muted);
   }
 }
 
@@ -41,4 +71,9 @@ body {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.card-bg {
+  background: var(--surface);
+  border-color: var(--border);
 }

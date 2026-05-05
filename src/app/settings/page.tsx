@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Trash2, Clock, BookOpen, Database, Info, Link as LinkIcon, Cloud, CloudOff, Upload, Download, Loader2, LogOut, User } from 'lucide-react'
+import { Trash2, Clock, BookOpen, Database, Info, Link as LinkIcon, Cloud, CloudOff, Upload, Download, Loader2, LogOut, User, Globe, Sun } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -11,8 +11,8 @@ import { usePreferenceStore } from '@/stores/preferenceStore'
 import { useSubjectStore } from '@/stores/subjectStore'
 import { db } from '@/lib/storage'
 import { isLoggedIn, getStoredUser, logout, pushToCloud, pullFromCloud, getMe } from '@/lib/sync'
-
-const DAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+import { useI18n } from '@/lib/i18n'
+import { useTheme } from '@/lib/theme'
 
 const COLORS = [
   '#ef4444', '#f97316', '#f59e0b', '#22c55e', '#10b981',
@@ -25,6 +25,8 @@ const ICONS = [
 ]
 
 export default function SettingsPage() {
+  const { t, locale, setLocale } = useI18n()
+  const { theme, setTheme } = useTheme()
   const { preferences, loadPreferences, updatePreferences } = usePreferenceStore()
   const { subjects, loadSubjects, initPresetSubjects, addSubject, updateSubject, deleteSubject } = useSubjectStore()
   const [addModalOpen, setAddModalOpen] = useState(false)
@@ -58,14 +60,15 @@ export default function SettingsPage() {
 
   const handlePomodoroMode = (mode: 'fixed' | 'adaptive') => {
     updatePreferences({ pomodoroMode: mode })
-    toast.success(mode === 'fixed' ? '已切换为固定时长模式' : '已切换为自适应模式')
+    const label = mode === 'fixed' ? t.settings.fixedMode : t.settings.adaptiveMode
+    toast.success(`${t.settings.pomodoroSettings}：${label}`)
   }
 
   const handlePush = async () => {
     setSyncLoading(true)
     try {
       await pushToCloud()
-      toast.success('数据已上传到云端')
+      toast.success(locale === 'zh-CN' ? '数据已上传到云端' : 'Data uploaded to cloud')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '上传失败')
     } finally {
@@ -77,7 +80,7 @@ export default function SettingsPage() {
     setSyncLoading(true)
     try {
       await pullFromCloud()
-      toast.success('数据已从云端同步')
+      toast.success(locale === 'zh-CN' ? '数据已从云端同步' : 'Data synced from cloud')
       window.location.reload()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : '下载失败')
@@ -90,7 +93,7 @@ export default function SettingsPage() {
     logout()
     setLoggedIn(false)
     setUser(null)
-    toast.success('已退出登录')
+    toast.success(t.auth.logoutSuccess)
   }
 
   const handleClearData = async () => {
@@ -99,7 +102,7 @@ export default function SettingsPage() {
     await db.reviewReminders.clear()
     await db.subjects.clear()
     await db.userPreferences.clear()
-    toast.success('所有数据已清除')
+    toast.success(locale === 'zh-CN' ? '所有数据已清除' : 'All data cleared')
     setClearModalOpen(false)
     window.location.reload()
   }
@@ -113,7 +116,7 @@ export default function SettingsPage() {
       sortOrder: subjects.length,
       isPreset: false,
     })
-    toast.success(`已添加科目：${newName.trim()}`)
+    toast.success(locale === 'zh-CN' ? `已添加科目：${newName.trim()}` : `Subject added: ${newName.trim()}`)
     setNewName('')
     setAddModalOpen(false)
   }
@@ -125,7 +128,7 @@ export default function SettingsPage() {
       color: newColor,
       icon: newIcon,
     })
-    toast.success('科目已更新')
+    toast.success(locale === 'zh-CN' ? '科目已更新' : 'Subject updated')
     setEditSubjectId(null)
     setAddModalOpen(false)
   }
@@ -151,10 +154,10 @@ export default function SettingsPage() {
   if (!preferences) {
     return (
       <div className="space-y-4 pb-4">
-        <h1 className="text-lg font-bold">设置</h1>
+        <h1 className="text-lg font-bold text-text">{t.settings.title}</h1>
         <div className="animate-pulse space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-32 bg-gray-100 rounded-2xl" />
+            <div key={i} className="h-32 bg-bg rounded-2xl" />
           ))}
         </div>
       </div>
@@ -163,41 +166,116 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-4 pb-4">
-      <h1 className="text-lg font-bold">设置</h1>
+      <h1 className="text-lg font-bold text-text">{t.settings.title}</h1>
 
-      {/* 番茄钟设置 */}
-      <Card>
-        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
+      {/* Language */}
+      <Card className="card-bg">
+        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
+          <Globe className="w-4 h-4 text-primary" />
+          {t.settings.language}
+        </h2>
+        <div className="flex gap-1 bg-bg rounded-full p-1">
+          <button
+            onClick={() => setLocale('zh-CN')}
+            className={cn(
+              'flex-1 py-1.5 rounded-full text-xs font-medium transition',
+              locale === 'zh-CN'
+                ? 'bg-surface text-text shadow-sm'
+                : 'text-text-muted'
+            )}
+          >
+            中文
+          </button>
+          <button
+            onClick={() => setLocale('en-US')}
+            className={cn(
+              'flex-1 py-1.5 rounded-full text-xs font-medium transition',
+              locale === 'en-US'
+                ? 'bg-surface text-text shadow-sm'
+                : 'text-text-muted'
+            )}
+          >
+            English
+          </button>
+        </div>
+      </Card>
+
+      {/* Theme */}
+      <Card className="card-bg">
+        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
+          <Sun className="w-4 h-4 text-primary" />
+          {t.settings.theme}
+        </h2>
+        <div className="flex gap-1 bg-bg rounded-full p-1">
+          <button
+            onClick={() => setTheme('light')}
+            className={cn(
+              'flex-1 py-1.5 rounded-full text-xs font-medium transition',
+              theme === 'light'
+                ? 'bg-surface text-text shadow-sm'
+                : 'text-text-muted'
+            )}
+          >
+            {t.settings.lightMode}
+          </button>
+          <button
+            onClick={() => setTheme('dark')}
+            className={cn(
+              'flex-1 py-1.5 rounded-full text-xs font-medium transition',
+              theme === 'dark'
+                ? 'bg-surface text-text shadow-sm'
+                : 'text-text-muted'
+            )}
+          >
+            {t.settings.darkMode}
+          </button>
+          <button
+            onClick={() => setTheme('system')}
+            className={cn(
+              'flex-1 py-1.5 rounded-full text-xs font-medium transition',
+              theme === 'system'
+                ? 'bg-surface text-text shadow-sm'
+                : 'text-text-muted'
+            )}
+          >
+            {t.settings.systemMode}
+          </button>
+        </div>
+      </Card>
+
+      {/* Pomodoro Settings */}
+      <Card className="card-bg">
+        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Clock className="w-4 h-4 text-primary" />
-          番茄钟设置
+          {t.settings.pomodoroSettings}
         </h2>
 
         <div className="space-y-4">
           {/* Mode toggle */}
           <div>
-            <p className="text-xs text-text-muted mb-1.5">时长模式</p>
-            <div className="flex gap-1 bg-gray-100 rounded-full p-1">
+            <p className="text-xs text-text-muted mb-1.5">{t.settings.pomodoroSettings}</p>
+            <div className="flex gap-1 bg-bg rounded-full p-1">
               <button
                 onClick={() => handlePomodoroMode('fixed')}
                 className={cn(
                   'flex-1 py-1.5 rounded-full text-xs font-medium transition',
                   preferences.pomodoroMode === 'fixed'
-                    ? 'bg-white text-text shadow-sm'
+                    ? 'bg-surface text-text shadow-sm'
                     : 'text-text-muted'
                 )}
               >
-                固定时长
+                {t.settings.fixedMode}
               </button>
               <button
                 onClick={() => handlePomodoroMode('adaptive')}
                 className={cn(
                   'flex-1 py-1.5 rounded-full text-xs font-medium transition',
                   preferences.pomodoroMode === 'adaptive'
-                    ? 'bg-white text-text shadow-sm'
+                    ? 'bg-surface text-text shadow-sm'
                     : 'text-text-muted'
                 )}
               >
-                自适应
+                {t.settings.adaptiveMode}
               </button>
             </div>
           </div>
@@ -205,8 +283,8 @@ export default function SettingsPage() {
           {/* Focus duration */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <p className="text-xs text-text-muted">专注时长 (分钟)</p>
-              <span className="text-xs font-medium text-primary">{preferences.pomodoroFocusMinutes}分钟</span>
+              <p className="text-xs text-text-muted">{t.settings.focusDuration}</p>
+              <span className="text-xs font-medium text-primary">{preferences.pomodoroFocusMinutes}{t.tasks.minutes}</span>
             </div>
             <input
               type="range"
@@ -225,8 +303,8 @@ export default function SettingsPage() {
           {/* Break duration */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <p className="text-xs text-text-muted">短休息时长 (分钟)</p>
-              <span className="text-xs font-medium text-success">{preferences.pomodoroBreakMinutes}分钟</span>
+              <p className="text-xs text-text-muted">{t.settings.breakDuration}</p>
+              <span className="text-xs font-medium text-success">{preferences.pomodoroBreakMinutes}{t.tasks.minutes}</span>
             </div>
             <input
               type="range"
@@ -245,8 +323,8 @@ export default function SettingsPage() {
           {/* Long break duration */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <p className="text-xs text-text-muted">长休息时长 (分钟)</p>
-              <span className="text-xs font-medium text-warning">{preferences.pomodoroLongBreakMinutes}分钟</span>
+              <p className="text-xs text-text-muted">{t.settings.longBreakDuration}</p>
+              <span className="text-xs font-medium text-warning">{preferences.pomodoroLongBreakMinutes}{t.tasks.minutes}</span>
             </div>
             <input
               type="range"
@@ -265,8 +343,8 @@ export default function SettingsPage() {
           {/* Long break interval */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <p className="text-xs text-text-muted">长休息间隔 (轮)</p>
-              <span className="text-xs font-medium text-danger">{preferences.pomodoroLongBreakInterval}轮</span>
+              <p className="text-xs text-text-muted">{t.settings.longBreakInterval}</p>
+              <span className="text-xs font-medium text-danger">{preferences.pomodoroLongBreakInterval}{t.settings.rounds}</span>
             </div>
             <input
               type="range"
@@ -284,36 +362,36 @@ export default function SettingsPage() {
         </div>
       </Card>
 
-      {/* 学习时间 */}
-      <Card>
-        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
+      {/* Study Time */}
+      <Card className="card-bg">
+        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Clock className="w-4 h-4 text-primary" />
-          学习时间
+          {t.settings.studyTime}
         </h2>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-text-muted">每日开始时间</p>
+            <p className="text-sm text-text-muted">{t.settings.dailyStart}</p>
             <input
               type="time"
               value={preferences.dailyStudyStart}
               onChange={e => updatePreferences({ dailyStudyStart: e.target.value })}
-              className="px-3 py-1.5 border border-border rounded-lg text-sm"
+              className="px-3 py-1.5 border border-border rounded-lg text-sm text-text bg-surface"
             />
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-sm text-text-muted">每日结束时间</p>
+            <p className="text-sm text-text-muted">{t.settings.dailyEnd}</p>
             <input
               type="time"
               value={preferences.dailyStudyEnd}
               onChange={e => updatePreferences({ dailyStudyEnd: e.target.value })}
-              className="px-3 py-1.5 border border-border rounded-lg text-sm"
+              className="px-3 py-1.5 border border-border rounded-lg text-sm text-text bg-surface"
             />
           </div>
           <div>
-            <p className="text-sm text-text-muted mb-2">每周休息日</p>
+            <p className="text-sm text-text-muted mb-2">{t.settings.offDays}</p>
             <div className="flex gap-1.5 flex-wrap">
-              {DAY_LABELS.map((label, idx) => {
+              {t.settings.daysOfWeek.map((label, idx) => {
                 const selected = preferences.weeklyOffDays.includes(idx)
                 return (
                   <button
@@ -340,11 +418,11 @@ export default function SettingsPage() {
         </div>
       </Card>
 
-      {/* 科目管理 */}
-      <Card>
-        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
+      {/* Subject Management */}
+      <Card className="card-bg">
+        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <BookOpen className="w-4 h-4 text-primary" />
-          科目管理
+          {t.settings.subjectManagement}
         </h2>
 
         <div className="space-y-2">
@@ -359,15 +437,17 @@ export default function SettingsPage() {
               >
                 {s.name[0]}
               </div>
-              <p className="flex-1 text-sm font-medium">{s.name}</p>
+              <p className="flex-1 text-sm font-medium text-text">{s.name}</p>
               {s.isPreset ? (
-                <span className="text-[10px] text-text-muted bg-gray-100 px-2 py-0.5 rounded">预置</span>
+                <span className="text-[10px] text-text-muted bg-bg px-2 py-0.5 rounded">
+                  {locale === 'zh-CN' ? '预置' : 'Preset'}
+                </span>
               ) : (
                 <button
                   onClick={() => openEditModal(s.id)}
                   className="text-xs text-primary font-medium"
                 >
-                  编辑
+                  {locale === 'zh-CN' ? '编辑' : 'Edit'}
                 </button>
               )}
               {!s.isPreset && (
@@ -386,15 +466,15 @@ export default function SettingsPage() {
           onClick={openAddModal}
           className="mt-3 w-full py-2 border border-dashed border-primary/40 rounded-xl text-sm text-primary font-medium hover:bg-primary/5 transition"
         >
-          + 添加自定义科目
+          + {t.settings.addSubject}
         </button>
       </Card>
 
-      {/* 数据 & 云端同步 */}
-      <Card>
-        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
+      {/* Data & Sync */}
+      <Card className="card-bg">
+        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Database className="w-4 h-4 text-primary" />
-          数据与同步
+          {t.settings.data}
         </h2>
 
         <div className="space-y-3">
@@ -405,11 +485,11 @@ export default function SettingsPage() {
                   <User className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{user.name}</p>
+                  <p className="text-sm font-medium text-text truncate">{user.name}</p>
                   <p className="text-xs text-text-muted truncate">{user.email}</p>
                 </div>
                 <span className="px-2 py-0.5 bg-success/10 text-success text-xs rounded-full font-medium">
-                  已连接
+                  {t.settings.connected}
                 </span>
               </div>
 
@@ -417,18 +497,18 @@ export default function SettingsPage() {
                 <button
                   onClick={handlePush}
                   disabled={syncLoading}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-border text-sm font-medium hover:bg-bg transition disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-border text-sm font-medium text-text hover:bg-bg transition disabled:opacity-50"
                 >
                   {syncLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  上传
+                  {t.settings.upload}
                 </button>
                 <button
                   onClick={handlePull}
                   disabled={syncLoading}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-border text-sm font-medium hover:bg-bg transition disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-border text-sm font-medium text-text hover:bg-bg transition disabled:opacity-50"
                 >
                   {syncLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                  下载
+                  {t.settings.download}
                 </button>
               </div>
 
@@ -437,23 +517,23 @@ export default function SettingsPage() {
                 className="flex items-center gap-2 py-2 text-sm text-danger hover:text-danger/80 transition w-full"
               >
                 <LogOut className="w-4 h-4" />
-                退出登录
+                {t.settings.logout}
               </button>
             </>
           ) : (
             <>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">存储模式</p>
-                  <p className="text-xs text-text-muted">本地存储 (IndexedDB)</p>
+                  <p className="text-sm font-medium text-text">{t.settings.storageMode}</p>
+                  <p className="text-xs text-text-muted">{t.settings.local}</p>
                 </div>
-                <span className="px-3 py-1 bg-gray-100 text-text-muted text-xs rounded-lg font-medium flex items-center gap-1">
+                <span className="px-3 py-1 bg-bg text-text-muted text-xs rounded-lg font-medium flex items-center gap-1">
                   <CloudOff className="w-3 h-3" />
-                  离线
+                  {t.settings.offline}
                 </span>
               </div>
               <p className="text-xs text-text-muted">
-                登录后可将数据同步到云端，跨设备使用
+                {t.settings.loggedIn}
               </p>
               <div className="flex gap-2">
                 <Link
@@ -461,53 +541,53 @@ export default function SettingsPage() {
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary-dark transition"
                 >
                   <Cloud className="w-4 h-4" />
-                  登录
+                  {t.settings.login}
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-border text-sm font-medium hover:bg-bg transition"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-border text-sm font-medium text-text hover:bg-bg transition"
                 >
-                  注册
+                  {t.settings.register}
                 </Link>
               </div>
             </>
           )}
 
-          <div className="border-t pt-3">
+          <div className="border-t border-border pt-3">
             <button
               onClick={() => setClearModalOpen(true)}
               className="flex items-center gap-2 py-2 text-sm text-danger hover:text-danger/80 transition"
             >
               <Trash2 className="w-4 h-4" />
-              清除所有数据
+              {t.settings.clearData}
             </button>
           </div>
         </div>
       </Card>
 
-      {/* 关于 */}
-      <Card>
-        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
+      {/* About */}
+      <Card className="card-bg">
+        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Info className="w-4 h-4 text-primary" />
-          关于
+          {t.settings.about}
         </h2>
 
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-text-muted">版本</span>
-            <span className="font-medium">1.0.0</span>
+            <span className="text-text-muted">{t.settings.version}</span>
+            <span className="font-medium text-text">1.0.0</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-text-muted">技术栈</span>
-            <span className="font-medium">Next.js 16 + Tailwind v4</span>
+            <span className="text-text-muted">{t.settings.techStack}</span>
+            <span className="font-medium text-text">Next.js 16 + Tailwind v4</span>
           </div>
           <Link
             href="#feedback"
-            onClick={e => { e.preventDefault(); toast.info('反馈功能即将上线') }}
+            onClick={e => { e.preventDefault(); toast.info(locale === 'zh-CN' ? '反馈功能即将上线' : 'Feedback coming soon') }}
             className="flex items-center gap-1 text-primary text-sm mt-2"
           >
             <LinkIcon className="w-3.5 h-3.5" />
-            意见反馈
+            {t.settings.feedback}
           </Link>
         </div>
       </Card>
@@ -516,21 +596,21 @@ export default function SettingsPage() {
       <Modal
         open={addModalOpen}
         onClose={() => { setAddModalOpen(false); setEditSubjectId(null) }}
-        title={editSubjectId ? '编辑科目' : '添加科目'}
+        title={editSubjectId ? t.settings.editSubject : t.settings.addSubject}
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">科目名称</label>
+            <label className="block text-sm font-medium text-text mb-1">{t.settings.subjectName}</label>
             <input
               type="text"
               value={newName}
               onChange={e => setNewName(e.target.value)}
-              placeholder="例如：编程"
-              className="w-full px-3 py-2 border border-border rounded-xl text-sm"
+              placeholder={locale === 'zh-CN' ? '例如：编程' : 'e.g. Programming'}
+              className="w-full px-3 py-2 border border-border rounded-xl text-sm text-text bg-surface"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">颜色</label>
+            <label className="block text-sm font-medium text-text mb-1">{t.settings.color}</label>
             <div className="flex gap-2 flex-wrap">
               {COLORS.map(c => (
                 <button
@@ -546,7 +626,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">图标</label>
+            <label className="block text-sm font-medium text-text mb-1">{t.settings.icon}</label>
             <div className="flex gap-2 flex-wrap">
               {ICONS.map(icon => (
                 <button
@@ -567,7 +647,7 @@ export default function SettingsPage() {
             onClick={editSubjectId ? handleEditSubject : handleAddSubject}
             className="w-full py-2.5 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary-dark transition"
           >
-            {editSubjectId ? '保存修改' : '添加'}
+            {editSubjectId ? (locale === 'zh-CN' ? '保存修改' : 'Save Changes') : (locale === 'zh-CN' ? '添加' : 'Add')}
           </button>
         </div>
       </Modal>
@@ -576,23 +656,23 @@ export default function SettingsPage() {
       <Modal
         open={clearModalOpen}
         onClose={() => setClearModalOpen(false)}
-        title="确认清除数据"
+        title={t.settings.clearDataTitle}
       >
         <p className="text-sm text-text-muted mb-4">
-          此操作将清除所有本地学习数据，包括任务、番茄钟记录、复习提醒和设置。此操作不可恢复。
+          {t.settings.clearDataConfirm}
         </p>
         <div className="flex gap-3">
           <button
             onClick={() => setClearModalOpen(false)}
-            className="flex-1 py-2.5 border border-border rounded-xl text-sm font-medium"
+            className="flex-1 py-2.5 border border-border rounded-xl text-sm font-medium text-text"
           >
-            取消
+            {t.common.cancel}
           </button>
           <button
             onClick={handleClearData}
             className="flex-1 py-2.5 bg-danger text-white rounded-xl text-sm font-medium hover:bg-danger/90 transition"
           >
-            确认清除
+            {t.common.confirm}
           </button>
         </div>
       </Modal>

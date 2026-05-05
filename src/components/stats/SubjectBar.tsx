@@ -13,7 +13,7 @@ export function SubjectBar({ data, maxMinutes }: SubjectBarProps) {
         return (
           <div key={item.name} className="flex items-center gap-2">
             <span className="w-12 text-xs text-text-muted flex-shrink-0">{item.name}</span>
-            <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="flex-1 h-5 bg-surface rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{ width: `${width}%`, backgroundColor: item.color }}

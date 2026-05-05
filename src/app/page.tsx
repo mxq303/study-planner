@@ -15,16 +15,10 @@ import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PriorityBadge } from '@/components/ui/PriorityBadge'
 import { getTimeString } from '@/lib/utils'
-
-function getGreeting() {
-  const h = new Date().getHours()
-  if (h < 6) return { text: '夜深了', icon: Moon }
-  if (h < 12) return { text: '早上好', icon: Sunrise }
-  if (h < 18) return { text: '下午好', icon: Sun }
-  return { text: '晚上好', icon: Moon }
-}
+import { useI18n } from '@/lib/i18n'
 
 export default function DashboardPage() {
+  const { t } = useI18n()
   const { tasks, completeTask, loadTasks } = useTaskStore()
   const { subjects, loadSubjects } = useSubjectStore()
   const { sessions, loadSessions } = usePomodoroStore()
@@ -35,7 +29,14 @@ export default function DashboardPage() {
     loadSessions()
   }, [loadTasks, loadSubjects, loadSessions])
 
-  const greeting = useMemo(() => getGreeting(), [])
+  const greeting = useMemo(() => {
+    const h = new Date().getHours()
+    if (h < 6) return { text: t.home.greeting.evening, icon: Moon }
+    if (h < 12) return { text: t.home.greeting.morning, icon: Sunrise }
+    if (h < 18) return { text: t.home.greeting.afternoon, icon: Sun }
+    return { text: t.home.greeting.evening, icon: Moon }
+  }, [t])
+
   const GreetingIcon = greeting.icon
   const todayStr = useMemo(() => format(new Date(), 'yyyy-MM-dd'), [])
 
@@ -84,27 +85,27 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      <Card className="mb-4">
+      <Card className="card-bg mb-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-semibold text-text flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-primary" />
-            今日计划
+            {t.home.todayPlan}
           </h2>
           <Link href="/calendar" className="text-xs text-text-muted hover:text-primary flex items-center gap-1">
-            查看日历 <ArrowRight className="w-3 h-3" />
+            {t.home.viewCalendar} <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
         {todayTasks.length === 0 ? (
           <EmptyState
             icon={<BookOpen className="w-8 h-8 text-primary" />}
-            title="今天还没有安排学习计划"
-            description="去添加任务并生成学习计划吧"
+            title={t.home.noPlanToday}
+            description={t.home.noPlanHint}
             action={
               <Link
                 href="/tasks/new"
                 className="inline-flex items-center gap-1 text-xs text-white bg-primary px-4 py-2 rounded-full font-medium"
               >
-                <Plus className="w-3.5 h-3.5" /> 添加任务
+                <Plus className="w-3.5 h-3.5" /> {t.home.addTask}
               </Link>
             }
             className="py-6"
@@ -117,7 +118,7 @@ export default function DashboardPage() {
                 <Link
                   key={task.id}
                   href={`/tasks/${task.id}`}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-bg transition-colors active:scale-[0.98]"
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-hover transition-colors active:scale-[0.98]"
                 >
                   <div
                     className="w-3 h-3 rounded-full flex-shrink-0"
@@ -137,21 +138,21 @@ export default function DashboardPage() {
         )}
       </Card>
 
-      <Card className="mb-4">
+      <Card className="card-bg mb-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-semibold text-text flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
-            待完成
+            {t.home.pendingTasks}
           </h2>
           <Link href="/tasks" className="text-xs text-text-muted hover:text-primary flex items-center gap-1">
-            全部 <ArrowRight className="w-3 h-3" />
+            {t.home.allTasks} <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
         {pendingTasks.length === 0 ? (
           <EmptyState
             icon={<CheckCircle2 className="w-8 h-8 text-success" />}
-            title="太棒了，所有任务都完成了！"
-            description="继续保持！"
+            title={t.home.allDone}
+            description={t.home.keepUp}
             className="py-6"
           />
         ) : (
@@ -162,7 +163,7 @@ export default function DashboardPage() {
                 <Link
                   key={task.id}
                   href={`/tasks/${task.id}`}
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-bg transition-colors group active:scale-[0.98]"
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-hover transition-colors group active:scale-[0.98]"
                 >
                   <button
                     onClick={async (e) => {
@@ -181,7 +182,7 @@ export default function DashboardPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-text truncate">{task.title}</p>
                     <p className="text-xs text-text-muted">
-                      {task.deadline ? `截止: ${format(new Date(task.deadline), 'M/d')}` : '无截止日期'}
+                      {task.deadline ? `${t.home.dueDate}: ${format(new Date(task.deadline), 'M/d')}` : t.home.noDeadline}
                     </p>
                   </div>
                   <PriorityBadge priority={task.priority} />
@@ -192,19 +193,19 @@ export default function DashboardPage() {
         )}
       </Card>
 
-      <Card>
+      <Card className="card-bg">
         <h2 className="text-base font-semibold text-text flex items-center gap-2 mb-3">
           <Clock className="w-4 h-4 text-primary" />
-          今日学习
+          {t.home.todayStudy}
         </h2>
         <div className="flex items-center gap-6">
-          <div className="flex-1 text-center p-3 rounded-xl bg-bg">
+          <div className="flex-1 text-center p-3 rounded-xl bg-surface">
             <p className="text-2xl font-bold text-primary">{todayPomodoros}</p>
-            <p className="text-xs text-text-muted mt-0.5">番茄钟</p>
+            <p className="text-xs text-text-muted mt-0.5">{t.home.pomodoros}</p>
           </div>
-          <div className="flex-1 text-center p-3 rounded-xl bg-bg">
+          <div className="flex-1 text-center p-3 rounded-xl bg-surface">
             <p className="text-2xl font-bold text-primary">{todayMinutes}</p>
-            <p className="text-xs text-text-muted mt-0.5">学习分钟</p>
+            <p className="text-xs text-text-muted mt-0.5">{t.home.studyMinutes}</p>
           </div>
         </div>
       </Card>

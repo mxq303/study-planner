@@ -19,9 +19,11 @@ import { generateSchedule } from '@/lib/schedule'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n'
 import type { ScheduleSlot } from '@/types'
 
 export default function CalendarPage() {
+  const { t } = useI18n()
   const { tasks, loadTasks, updateTask } = useTaskStore()
   const { subjects, loadSubjects } = useSubjectStore()
   const { preferences, loadPreferences } = usePreferenceStore()
@@ -103,18 +105,18 @@ export default function CalendarPage() {
     <div className="pb-6">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1">
-          <h1 className="text-lg font-bold text-text">学习日历</h1>
+          <h1 className="text-lg font-bold text-text">{t.schedule.title}</h1>
         </div>
         <p className="text-xs text-text-muted">
-          根据你的偏好和任务自动安排学习计划
+          {t.schedule.noScheduleHint}
         </p>
       </div>
 
-      <Card className="p-3 mb-4">
+      <Card className="card-bg p-3 mb-4">
         <div className="flex items-center justify-between mb-3">
           <button
             onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}
-            className="p-1.5 rounded-lg hover:bg-bg text-text-muted"
+            className="p-1.5 rounded-lg hover:bg-hover text-text-muted"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -123,7 +125,7 @@ export default function CalendarPage() {
           </span>
           <button
             onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
-            className="p-1.5 rounded-lg hover:bg-bg text-text-muted"
+            className="p-1.5 rounded-lg hover:bg-hover text-text-muted"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -183,31 +185,31 @@ export default function CalendarPage() {
         className={cn(
           'w-full py-3 rounded-xl text-sm font-semibold active:scale-[0.98] transition-transform flex items-center justify-center gap-2 mb-4',
           generating
-            ? 'bg-bg text-text-muted'
+            ? 'bg-surface text-text-muted'
             : 'bg-primary text-white shadow-lg shadow-primary/30'
         )}
       >
         {generating ? (
           <>
-            <Wand2 className="w-4 h-4 animate-pulse" /> 正在生成计划...
+            <Wand2 className="w-4 h-4 animate-pulse" /> {t.schedule.generate}...
           </>
         ) : (
           <>
-            <Wand2 className="w-4 h-4" /> 生成计划
+            <Wand2 className="w-4 h-4" /> {t.schedule.generate}
           </>
         )}
       </button>
 
-      <Card>
+      <Card className="card-bg">
         <h3 className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-primary" />
-          今日安排
+          {t.home.todayPlan}
         </h3>
         {todaySlots.length === 0 ? (
           <EmptyState
             icon={<Clock className="w-8 h-8 text-primary" />}
-            title="今天还没有安排"
-            description="点击上方「生成计划」自动安排学习时段"
+            title={t.schedule.noSchedule}
+            description={t.schedule.noScheduleHint}
             className="py-6"
           />
         ) : (
@@ -218,7 +220,7 @@ export default function CalendarPage() {
                 <Link
                   key={i}
                   href={`/tasks/${slot.taskId}`}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-bg transition-colors active:scale-[0.98]"
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-hover transition-colors active:scale-[0.98]"
                 >
                   <div className="w-1.5 self-stretch rounded-full flex-shrink-0"
                     style={{ backgroundColor: slot.subjectColor || '#6366f1' }}
