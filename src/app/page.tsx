@@ -67,22 +67,25 @@ export default function DashboardPage() {
 
   return (
     <div className="pb-4 animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-2 text-text-muted">
+      <div className="relative overflow-hidden rounded-2xl p-5 mb-6 animate-slide-up" style={{
+        background: 'linear-gradient(135deg, var(--accent, #6366f1) 0%, #818cf8 50%, #c084fc 100%)'
+      }}>
+        <div className="absolute inset-0 bg-black/10" />
+        <div className="relative z-10 text-white">
+          <div className="flex items-center gap-2 opacity-80">
             <GreetingIcon className="w-5 h-5" />
             <span className="text-sm">{greeting.text}</span>
           </div>
-          <h1 className="text-2xl font-bold text-text mt-1">
-            {format(new Date(), 'M月d日 EEEE', { locale: zhCN })}
-          </h1>
+          <h1 className="text-2xl font-bold mt-1">{format(new Date(), 'M月d日 EEEE', { locale: zhCN })}</h1>
         </div>
         <Link
           href="/tasks/new"
-          className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/30 active:scale-95 transition-transform animate-bounce-gentle"
+          className="absolute bottom-4 right-4 z-10 w-10 h-10 rounded-full bg-white/20 text-white flex items-center justify-center backdrop-blur-sm hover:bg-white/30 active:scale-95 transition-transform shadow-lg"
         >
           <Plus className="w-5 h-5" />
         </Link>
+        <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10" />
+        <div className="absolute -bottom-4 right-12 w-16 h-16 rounded-full bg-white/5" />
       </div>
 
       <Card className="card-bg mb-4 card-hover">
@@ -199,11 +202,11 @@ export default function DashboardPage() {
           {t.home.todayStudy}
         </h2>
         <div className="flex items-center gap-6">
-          <div className="flex-1 text-center p-3 rounded-xl bg-surface">
+            <div className="flex-1 text-center p-3 rounded-xl glass-card">
             <p className="text-2xl font-bold text-primary">{todayPomodoros}</p>
             <p className="text-xs text-text-muted mt-0.5">{t.home.pomodoros}</p>
           </div>
-          <div className="flex-1 text-center p-3 rounded-xl bg-surface">
+            <div className="flex-1 text-center p-3 rounded-xl glass-card">
             <p className="text-2xl font-bold text-primary">{todayMinutes}</p>
             <p className="text-xs text-text-muted mt-0.5">{t.home.studyMinutes}</p>
           </div>

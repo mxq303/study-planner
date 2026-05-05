@@ -134,12 +134,12 @@ export default function PomodoroPage() {
       {/* Timer display */}
       <Card className="flex flex-col items-center py-8">
         {/* Mode toggle */}
-        <div className="flex gap-1 bg-surface rounded-full p-1 mb-6 animate-scale-in">
+        <div className="inline-flex items-center gap-1 px-1 py-0.5 rounded-full bg-hover mb-6 animate-scale-in">
           <button
             onClick={() => handleModeSwitch('focus')}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
               timer.mode === 'focus'
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-white shadow-lg'
                 : 'text-text-muted'
             }`}
           >
@@ -147,9 +147,9 @@ export default function PomodoroPage() {
           </button>
           <button
             onClick={() => handleModeSwitch('break')}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
               timer.mode === 'break'
-                ? 'bg-success text-white'
+                ? 'bg-success text-white shadow-lg'
                 : 'text-text-muted'
             }`}
           >
@@ -159,7 +159,10 @@ export default function PomodoroPage() {
 
         {/* Circular progress */}
         <div className="relative flex items-center justify-center mb-6">
-          <svg viewBox="0 0 280 280" className="w-[280px] max-w-full h-auto -rotate-90">
+          <div className="absolute w-48 h-48 rounded-full opacity-20 blur-3xl" style={{
+            background: `radial-gradient(circle, ${timer.mode === 'focus' ? '#6366f1' : '#22c55e'} 0%, transparent 70%)`
+          }} />
+          <svg viewBox="0 0 280 280" className="w-[280px] max-w-full h-auto -rotate-90" style={{ filter: `drop-shadow(0 0 10px ${timer.mode === 'focus' ? 'rgba(99,102,241,0.4)' : 'rgba(34,197,94,0.4)'})` }}>
             <circle
               cx="140"
               cy="140"
@@ -184,7 +187,7 @@ export default function PomodoroPage() {
             />
           </svg>
           <div className="absolute flex flex-col items-center">
-            <span className="text-5xl font-bold tabular-nums tracking-tight text-text animate-bounce-gentle">
+            <span className="text-5xl font-bold tabular-nums tracking-tight text-text animate-bounce-gentle" style={{ textShadow: '0 2px 10px rgba(99,102,241,0.3)' }}>
               {formatTime(timer.secondsLeft)}
             </span>
             <span className="text-sm text-text-muted mt-1">

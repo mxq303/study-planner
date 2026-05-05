@@ -49,6 +49,9 @@ export const usePreferenceStore = create<PreferenceStore>((set, get) => ({
       soundEnabled: true,
       accentColor: '#6366f1',
       onboardingCompleted: false,
+      cardStyle: 'solid',
+      uiDensity: 'comfortable',
+      fontSizeScale: 'md',
     }
     await db.userPreferences.add(pref)
     set({ preferences: pref })

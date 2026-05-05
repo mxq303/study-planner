@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Trash2, Clock, BookOpen, Database, Info, Link as LinkIcon, Cloud, CloudOff, Upload, Download, Loader2, LogOut, User, Globe, Sun } from 'lucide-react'
+import { Trash2, Clock, BookOpen, Database, Info, Link as LinkIcon, Cloud, CloudOff, Upload, Download, Loader2, LogOut, User, Globe, Sun, Palette, LayoutGrid, Type, Layers } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -57,6 +57,14 @@ export default function SettingsPage() {
     if (!preferences) return
     initPresetSubjects()
   }, [preferences, initPresetSubjects])
+
+  useEffect(() => {
+    if (!preferences) return
+    document.documentElement.style.setProperty('--accent', preferences.accentColor || '#6366f1')
+    document.documentElement.className = document.documentElement.className
+      .replace(/text-scale-\w+/g, `text-scale-${preferences.fontSizeScale || 'md'}`)
+      .replace(/density-\w+/g, `density-${preferences.uiDensity || 'comfortable'}`)
+  }, [preferences])
 
   const handlePomodoroMode = (mode: 'fixed' | 'adaptive') => {
     updatePreferences({ pomodoroMode: mode })
@@ -243,8 +251,130 @@ export default function SettingsPage() {
         </div>
       </Card>
 
-      {/* Pomodoro Settings */}
+      {/* 外观个性化 */}
       <Card className="card-bg animate-slide-up stagger-3">
+        <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
+          <Palette className="w-4 h-4 text-primary" />
+          外观个性化
+        </h2>
+
+        <div className="space-y-4">
+          {/* Accent Color */}
+          <div>
+            <p className="text-xs text-text-muted mb-2">主题色</p>
+            <div className="flex gap-2 flex-wrap">
+              {[
+                { name: 'indigo', value: '#6366f1' },
+                { name: 'blue', value: '#3b82f6' },
+                { name: 'green', value: '#22c55e' },
+                { name: 'rose', value: '#f43f5e' },
+                { name: 'amber', value: '#f59e0b' },
+                { name: 'violet', value: '#8b5cf6' },
+                { name: 'cyan', value: '#06b6d4' },
+                { name: 'teal', value: '#14b8a6' },
+              ].map(c => (
+                <button
+                  key={c.value}
+                  onClick={() => updatePreferences({ accentColor: c.value })}
+                  className="w-7 h-7 rounded-full border-2 transition"
+                  style={{
+                    backgroundColor: c.value,
+                    borderColor: preferences.accentColor === c.value ? 'var(--color-text)' : 'transparent',
+                  }}
+                  title={c.name}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Card Style */}
+          <div>
+            <p className="text-xs text-text-muted mb-1.5 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5" />
+              卡片风格
+            </p>
+            <div className="flex gap-1 bg-bg rounded-full p-1">
+              {[
+                { value: 'solid', label: '实心' },
+                { value: 'glass', label: '玻璃' },
+                { value: 'outlined', label: '描边' },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => updatePreferences({ cardStyle: opt.value })}
+                  className={cn(
+                    'flex-1 py-1.5 rounded-full text-xs font-medium transition',
+                    preferences.cardStyle === opt.value
+                      ? 'bg-surface text-text shadow-sm'
+                      : 'text-text-muted'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* UI Density */}
+          <div>
+            <p className="text-xs text-text-muted mb-1.5 flex items-center gap-1.5">
+              <LayoutGrid className="w-3.5 h-3.5" />
+              布局密度
+            </p>
+            <div className="flex gap-1 bg-bg rounded-full p-1">
+              {[
+                { value: 'compact', label: '紧凑' },
+                { value: 'comfortable', label: '舒适' },
+                { value: 'spacious', label: '宽松' },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => updatePreferences({ uiDensity: opt.value })}
+                  className={cn(
+                    'flex-1 py-1.5 rounded-full text-xs font-medium transition',
+                    preferences.uiDensity === opt.value
+                      ? 'bg-surface text-text shadow-sm'
+                      : 'text-text-muted'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Font Size */}
+          <div>
+            <p className="text-xs text-text-muted mb-1.5 flex items-center gap-1.5">
+              <Type className="w-3.5 h-3.5" />
+              字体大小
+            </p>
+            <div className="flex gap-1 bg-bg rounded-full p-1">
+              {[
+                { value: 'sm', label: '小' },
+                { value: 'md', label: '中' },
+                { value: 'lg', label: '大' },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => updatePreferences({ fontSizeScale: opt.value })}
+                  className={cn(
+                    'flex-1 py-1.5 rounded-full text-xs font-medium transition',
+                    preferences.fontSizeScale === opt.value
+                      ? 'bg-surface text-text shadow-sm'
+                      : 'text-text-muted'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Pomodoro Settings */}
+      <Card className="card-bg animate-slide-up stagger-4">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Clock className="w-4 h-4 text-primary" />
           {t.settings.pomodoroSettings}
@@ -363,7 +493,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Study Time */}
-      <Card className="card-bg animate-slide-up stagger-4">
+      <Card className="card-bg animate-slide-up stagger-5">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Clock className="w-4 h-4 text-primary" />
           {t.settings.studyTime}
@@ -419,7 +549,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Subject Management */}
-      <Card className="card-bg animate-slide-up stagger-5">
+      <Card className="card-bg animate-slide-up stagger-6">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <BookOpen className="w-4 h-4 text-primary" />
           {t.settings.subjectManagement}
@@ -463,7 +593,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Data & Sync */}
-      <Card className="card-bg animate-slide-up stagger-6">
+      <Card className="card-bg animate-slide-up stagger-7">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Database className="w-4 h-4 text-primary" />
           {t.settings.data}
@@ -558,7 +688,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* About */}
-      <Card className="card-bg animate-slide-up stagger-7">
+      <Card className="card-bg animate-slide-up stagger-8">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Info className="w-4 h-4 text-primary" />
           {t.settings.about}

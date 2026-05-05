@@ -79,6 +79,9 @@ export interface UserPreference {
   soundEnabled: boolean
   accentColor: string
   onboardingCompleted: boolean
+  cardStyle: string
+  uiDensity: string
+  fontSizeScale: string
 }
 
 export interface ScheduleSlot {
