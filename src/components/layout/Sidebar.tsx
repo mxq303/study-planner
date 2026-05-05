@@ -34,14 +34,15 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {items.map(item => {
+        {items.map((item, i) => {
           const active = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 animate-slide-right',
+                `stagger-${i + 1}`,
                 active
                   ? 'bg-primary/10 text-primary'
                   : 'text-text-muted hover:bg-hover hover:text-text'

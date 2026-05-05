@@ -84,11 +84,11 @@ export default function NewTaskPage() {
   }
 
   return (
-    <div className="pb-6">
+    <div className="pb-6 animate-slide-up">
       <PageHeader title={t.tasks.edit} backHref="/tasks" />
 
       {showQuickAdd && (
-        <Card className="mb-4 border-primary/20 bg-primary/[0.02]">
+        <Card className="mb-4 border-primary/20 bg-primary/[0.02] animate-fade-in stagger-1">
           <div className="flex items-center gap-2 mb-3">
             <Zap className="w-4 h-4 text-primary" />
             <span className="text-sm font-semibold text-text">{t.tasks.quickAdd}</span>
@@ -148,7 +148,7 @@ export default function NewTaskPage() {
         </button>
       )}
 
-      <Card>
+      <Card className="animate-fade-in stagger-2">
         <h3 className="text-sm font-semibold text-text mb-4">{locale === 'zh-CN' ? '完整信息' : 'Full details'}</h3>
 
         <div className="space-y-4">
@@ -252,7 +252,7 @@ export default function NewTaskPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full py-3 rounded-xl bg-primary text-white text-sm font-semibold active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-xl bg-primary text-white text-sm font-semibold active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2 animate-bounce-gentle"
           >
             <Save className="w-4 h-4" />
             {saving ? (locale === 'zh-CN' ? '保存中...' : 'Saving...') : t.tasks.saveChanges}

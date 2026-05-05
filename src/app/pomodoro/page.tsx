@@ -127,13 +127,13 @@ export default function PomodoroPage() {
   const pendingTasks = tasks.filter(t => t.status !== 'completed')
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-4 pb-4 animate-fade-in">
       <h1 className="text-lg font-bold text-text">{t.pomodoro.title}</h1>
 
       {/* Timer display */}
       <Card className="flex flex-col items-center py-8">
         {/* Mode toggle */}
-        <div className="flex gap-1 bg-surface rounded-full p-1 mb-6">
+        <div className="flex gap-1 bg-surface rounded-full p-1 mb-6 animate-scale-in">
           <button
             onClick={() => handleModeSwitch('focus')}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
@@ -166,6 +166,7 @@ export default function PomodoroPage() {
               fill="none"
               stroke="#e2e8f0"
               strokeWidth="10"
+              className="animate-pulse-ring"
             />
             <circle
               cx="140"
@@ -177,11 +178,12 @@ export default function PomodoroPage() {
               strokeLinecap="round"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
-              className="transition-all duration-500 ease-linear"
+              className="animate-progress"
+              style={{ '--progress-full': circumference, '--progress-current': strokeDashoffset } as React.CSSProperties}
             />
           </svg>
           <div className="absolute flex flex-col items-center">
-            <span className="text-5xl font-bold tabular-nums tracking-tight text-text">
+            <span className="text-5xl font-bold tabular-nums tracking-tight text-text animate-bounce-gentle">
               {formatTime(timer.secondsLeft)}
             </span>
             <span className="text-sm text-text-muted mt-1">
@@ -233,7 +235,7 @@ export default function PomodoroPage() {
           <button
             key={min}
             onClick={() => handlePreset(min)}
-            className={`flex-1 py-2 rounded-xl text-sm font-medium border transition ${
+            className={`flex-1 py-2 rounded-xl text-sm font-medium border transition card-hover ${
               timer.totalSeconds === min * 60 && !timer.isRunning
                 ? 'border-primary bg-primary/10 text-primary'
                 : 'border-border text-text-muted hover:border-primary'
@@ -245,7 +247,7 @@ export default function PomodoroPage() {
       </div>
 
       {/* Today's stats */}
-      <Card>
+      <Card className="card-hover">
         <h3 className="text-sm font-medium text-text mb-3">{t.pomodoro.todayStats}</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-3">

@@ -41,7 +41,7 @@ function TaskCard({
       href={`/tasks/${task.id}`}
       className="block"
     >
-      <Card className="active:scale-[0.98] transition-transform hover:shadow-md">
+      <Card className="card-hover active:scale-[0.98] transition-transform hover:shadow-md">
         <div className="flex items-start gap-3">
           {task.status === 'completed' ? (
             <CheckCircle2 className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
@@ -52,7 +52,7 @@ function TaskCard({
                 e.stopPropagation()
                 onComplete()
               }}
-              className="text-text-muted hover:text-success transition-colors mt-0.5 flex-shrink-0"
+              className="animate-check-pop text-text-muted hover:text-success transition-colors mt-0.5 flex-shrink-0"
             >
               <Circle className="w-5 h-5" />
             </button>
@@ -156,7 +156,7 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 animate-fade-in">
       <PageHeader
         title={t.tasks.title}
         action={
@@ -175,7 +175,7 @@ export default function TasksPage() {
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={cn(
-              'flex-1 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
+              'animate-scale-in flex-1 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
               activeTab === tab.key
                 ? 'bg-primary text-white shadow-sm'
                 : 'text-text-muted hover:text-text'
@@ -218,16 +218,17 @@ export default function TasksPage() {
                   <span className="ml-1 font-normal normal-case">({list.length})</span>
                 </h3>
                 <div className="space-y-2">
-                  {list.map(task => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      subject={getSubjectById(task.subjectId)}
-                      onComplete={() => completeTask(task.id)}
-                      statusLabel={statusLabelMap[task.status]}
-                      minutesLabel={t.tasks.minutes}
-                      priorityLabels={t.tasks.priorityLevels}
-                    />
+                  {list.map((task, i) => (
+                    <div key={task.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
+                      <TaskCard
+                        task={task}
+                        subject={getSubjectById(task.subjectId)}
+                        onComplete={() => completeTask(task.id)}
+                        statusLabel={statusLabelMap[task.status]}
+                        minutesLabel={t.tasks.minutes}
+                        priorityLabels={t.tasks.priorityLevels}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -236,16 +237,17 @@ export default function TasksPage() {
         </div>
       ) : (
         <div className="space-y-2">
-          {filteredTasks.map(task => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              subject={getSubjectById(task.subjectId)}
-              onComplete={() => completeTask(task.id)}
-              statusLabel={statusLabelMap[task.status]}
-              minutesLabel={t.tasks.minutes}
-              priorityLabels={t.tasks.priorityLevels}
-            />
+          {filteredTasks.map((task, i) => (
+            <div key={task.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
+              <TaskCard
+                task={task}
+                subject={getSubjectById(task.subjectId)}
+                onComplete={() => completeTask(task.id)}
+                statusLabel={statusLabelMap[task.status]}
+                minutesLabel={t.tasks.minutes}
+                priorityLabels={t.tasks.priorityLevels}
+              />
+            </div>
           ))}
         </div>
       )}

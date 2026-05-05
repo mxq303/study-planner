@@ -122,7 +122,7 @@ export default function TaskDetailPage() {
   const currentStepIndex = STATUS_STEPS.findIndex(s => s.status === task.status)
 
   return (
-    <div className="pb-6">
+    <div className="pb-6 animate-fade-in">
       <div className="flex items-center gap-2 mb-4">
         <button
           onClick={() => router.back()}
@@ -139,7 +139,7 @@ export default function TaskDetailPage() {
         </button>
       </div>
 
-      <Card className="mb-4">
+      <Card className="mb-4 card-hover">
         <div className="flex items-center gap-2 mb-3">
           {subject && (
             <span
@@ -287,7 +287,7 @@ export default function TaskDetailPage() {
         <Card className="mb-4 border-dashed border-primary/30 bg-primary/[0.02]">
           <button
             onClick={handleDecompose}
-            className="w-full flex items-center justify-center gap-2 py-1"
+            className="w-full flex items-center justify-center gap-2 py-1 animate-bounce-gentle"
           >
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-primary">{t.tasks.aiDecompose}</span>
@@ -307,11 +307,12 @@ export default function TaskDetailPage() {
             )}
           </h3>
           <div className="space-y-2">
-            {subtasks.map(sub => (
+            {subtasks.map((sub, i) => (
               <Card
                 key={sub.id}
                 className={cn(
-                  'flex items-center gap-3',
+                  'flex items-center gap-3 animate-slide-up',
+                  `stagger-${(i % 8) + 1}`,
                   sub.status === 'completed' && 'opacity-60'
                 )}
               >

@@ -102,6 +102,7 @@ export default function CalendarPage() {
   const pendingCount = tasks.filter(t => t.status !== 'completed').length
 
   return (
+    <div className="animate-fade-in">
     <div className="pb-6">
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1">
@@ -146,7 +147,7 @@ export default function CalendarPage() {
               <button
                 key={date.toISOString()}
                 className={cn(
-                  'relative rounded-lg p-1 text-center min-h-[52px] flex flex-col items-center transition-colors',
+                  'relative rounded-lg p-1 text-center min-h-[52px] flex flex-col items-center transition-colors card-hover',
                   today && 'bg-primary/10 ring-1 ring-primary',
                   off && 'opacity-40',
                   past && !today && 'opacity-30',
@@ -220,7 +221,7 @@ export default function CalendarPage() {
                 <Link
                   key={i}
                   href={`/tasks/${slot.taskId}`}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-hover transition-colors active:scale-[0.98]"
+                  className={`flex items-center gap-3 p-3 rounded-xl hover:bg-hover transition-colors active:scale-[0.98] animate-slide-up stagger-${(i % 8) + 1}`}
                 >
                   <div className="w-1.5 self-stretch rounded-full flex-shrink-0"
                     style={{ backgroundColor: slot.subjectColor || '#6366f1' }}
@@ -239,6 +240,7 @@ export default function CalendarPage() {
           </div>
         )}
       </Card>
+    </div>
     </div>
   )
 }

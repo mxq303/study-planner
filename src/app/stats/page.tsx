@@ -142,6 +142,7 @@ export default function StatsPage() {
   }
 
   return (
+    <div className="animate-fade-in">
     <div className="space-y-4 pb-4">
       <h1 className="text-lg font-bold text-text">{t.stats.title}</h1>
 
@@ -166,7 +167,7 @@ export default function StatsPage() {
 
       {/* Stats summary grid */}
       <div className="grid grid-cols-2 gap-3">
-        <Card className="flex items-center gap-3">
+        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-1 card-hover">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <Flame className="w-5 h-5 text-primary" />
           </div>
@@ -175,7 +176,7 @@ export default function StatsPage() {
             <p className="text-xs text-text-muted">{t.stats.totalHours}</p>
           </div>
         </Card>
-        <Card className="flex items-center gap-3">
+        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-2 card-hover">
           <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
             <CheckCircle className="w-5 h-5 text-success" />
           </div>
@@ -184,7 +185,7 @@ export default function StatsPage() {
             <p className="text-xs text-text-muted">{t.stats.tasksCompleted}</p>
           </div>
         </Card>
-        <Card className="flex items-center gap-3">
+        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-3 card-hover">
           <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
             <Timer className="w-5 h-5 text-warning" />
           </div>
@@ -193,7 +194,7 @@ export default function StatsPage() {
             <p className="text-xs text-text-muted">{t.stats.pomodoroCount}</p>
           </div>
         </Card>
-        <Card className="flex items-center gap-3">
+        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-4 card-hover">
           <div className="w-10 h-10 rounded-xl bg-danger/10 flex items-center justify-center">
             <Zap className="w-5 h-5 text-danger" />
           </div>
@@ -205,13 +206,13 @@ export default function StatsPage() {
       </div>
 
       {/* Weekly heatmap */}
-      <Card>
+      <Card className="animate-fade-in">
         <h3 className="text-sm font-medium text-text mb-3">{t.stats.heatmap}</h3>
         <Heatmap data={heatmapData} dayLabels={dayLabelKeys} />
       </Card>
 
       {/* Subject distribution */}
-      <Card>
+      <Card className="animate-fade-in">
         <h3 className="text-sm font-medium text-text mb-3">{t.stats.subjectDistribution}</h3>
         {subjectData.length === 0 ? (
           <p className="text-sm text-text-muted text-center py-4">{t.common.noData}</p>
@@ -231,6 +232,7 @@ export default function StatsPage() {
           {rangeLabels[range]}
         </p>
       </Card>
+    </div>
     </div>
   )
 }

@@ -56,7 +56,7 @@ export default function ReviewsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 pb-4">
+    <div className="space-y-4 pb-4 animate-fade-in">
         <h1 className="text-lg font-bold text-text">{t.reviews.title}</h1>
         <div className="animate-pulse space-y-3">
           {[1, 2, 3].map(i => (
@@ -72,7 +72,7 @@ export default function ReviewsPage() {
       <h1 className="text-lg font-bold text-text">{t.reviews.title}</h1>
 
       {/* Stats card */}
-      <Card>
+      <Card className="animate-scale-in">
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
             <p className="text-2xl font-bold text-primary">{streak}</p>
@@ -106,19 +106,19 @@ export default function ReviewsPage() {
           />
         ) : (
           <div className="space-y-2">
-            {todayReminders.map(r => {
+            {todayReminders.map((r, i) => {
               const overdue = differenceInDays(startOfDay(new Date()), startOfDay(parseISO(r.reviewDate))) > 0
               return (
-                <Card
-                  key={r.id}
-                  className={cn(
-                    'flex items-center gap-3',
-                    overdue && 'border-danger/30'
-                  )}
-                >
+                <div key={r.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
+                  <Card
+                    className={cn(
+                      'flex items-center gap-3 card-hover',
+                      overdue && 'border-danger/30'
+                    )}
+                  >
                   <button
                     onClick={() => handleComplete(r.id)}
-                    className="w-6 h-6 rounded-full border-2 border-border flex items-center justify-center flex-shrink-0 hover:border-success hover:bg-success/10 transition"
+                    className="w-6 h-6 rounded-full border-2 border-border flex items-center justify-center flex-shrink-0 hover:border-success hover:bg-success/10 transition animate-check-pop"
                   >
                     <Check className="w-3.5 h-3.5 text-success opacity-0 group-hover:opacity-100" />
                   </button>
@@ -137,11 +137,12 @@ export default function ReviewsPage() {
                   </div>
                   <button
                     onClick={() => handleComplete(r.id)}
-                    className="px-3 py-1.5 bg-primary text-white text-xs rounded-lg font-medium hover:bg-primary-dark transition flex-shrink-0"
+                    className="px-3 py-1.5 bg-primary text-white text-xs rounded-lg font-medium hover:bg-primary-dark transition flex-shrink-0 animate-check-pop"
                   >
                     {t.reviews.completeReview}
                   </button>
                 </Card>
+                </div>
               )
             })}
           </div>
@@ -165,8 +166,9 @@ export default function ReviewsPage() {
           />
         ) : (
           <div className="space-y-2">
-            {upcomingReminders.map(r => (
-              <Card key={r.id} className="flex items-center gap-3">
+            {upcomingReminders.map((r, i) => (
+              <div key={r.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
+                <Card className="flex items-center gap-3 card-hover">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <span className="text-xs font-bold text-primary">{r.stage}</span>
                 </div>
@@ -180,6 +182,7 @@ export default function ReviewsPage() {
                 </div>
                 <ChevronRight className="w-4 h-4 text-text-muted flex-shrink-0" />
               </Card>
+              </div>
             ))}
           </div>
         )}

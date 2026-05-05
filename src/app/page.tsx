@@ -66,7 +66,7 @@ export default function DashboardPage() {
   const getSubjectById = (id?: string) => subjects.find(s => s.id === id)
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="flex items-center gap-2 text-text-muted">
@@ -79,13 +79,13 @@ export default function DashboardPage() {
         </div>
         <Link
           href="/tasks/new"
-          className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/30 active:scale-95 transition-transform"
+          className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/30 active:scale-95 transition-transform animate-bounce-gentle"
         >
           <Plus className="w-5 h-5" />
         </Link>
       </div>
 
-      <Card className="card-bg mb-4">
+      <Card className="card-bg mb-4 card-hover">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-semibold text-text flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-primary" />
@@ -112,13 +112,13 @@ export default function DashboardPage() {
           />
         ) : (
           <div className="space-y-2">
-            {todayTasks.slice(0, 5).map(task => {
+            {todayTasks.slice(0, 5).map((task, i) => {
               const subj = getSubjectById(task.subjectId)
               return (
                 <Link
                   key={task.id}
                   href={`/tasks/${task.id}`}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-hover transition-colors active:scale-[0.98]"
+                  className={`flex items-center gap-3 p-3 rounded-xl hover:bg-hover transition-colors active:scale-[0.98] stagger-${i + 1}`}
                 >
                   <div
                     className="w-3 h-3 rounded-full flex-shrink-0"
@@ -138,7 +138,7 @@ export default function DashboardPage() {
         )}
       </Card>
 
-      <Card className="card-bg mb-4">
+      <Card className="card-bg mb-4 card-hover">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-semibold text-text flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
@@ -157,13 +157,13 @@ export default function DashboardPage() {
           />
         ) : (
           <div className="space-y-1">
-            {pendingTasks.slice(0, 6).map(task => {
+            {pendingTasks.slice(0, 6).map((task, i) => {
               const subj = getSubjectById(task.subjectId)
               return (
                 <Link
                   key={task.id}
                   href={`/tasks/${task.id}`}
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-hover transition-colors group active:scale-[0.98]"
+                  className={`flex items-center gap-3 p-2.5 rounded-xl hover:bg-hover transition-colors group active:scale-[0.98] stagger-${i + 1}`}
                 >
                   <button
                     onClick={async (e) => {
@@ -193,7 +193,7 @@ export default function DashboardPage() {
         )}
       </Card>
 
-      <Card className="card-bg">
+      <Card className="card-bg card-hover">
         <h2 className="text-base font-semibold text-text flex items-center gap-2 mb-3">
           <Clock className="w-4 h-4 text-primary" />
           {t.home.todayStudy}
