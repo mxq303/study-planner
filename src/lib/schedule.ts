@@ -1,4 +1,4 @@
-import { type Task, type ScheduleSlot } from '@/types'
+import { type Task, type ScheduleSlot, type Subject } from '@/types'
 import { addDays, format, differenceInDays, isBefore } from 'date-fns'
 
 interface ScheduleInput {
