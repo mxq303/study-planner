@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Trash2, Clock, BookOpen, Database, Info, Link as LinkIcon, Cloud } from 'lucide-react'
+import { Trash2, Clock, BookOpen, Database, Info, Link as LinkIcon, Cloud, CloudOff, Upload, Download, Loader2, LogOut, User } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/Modal'
 import { usePreferenceStore } from '@/stores/preferenceStore'
 import { useSubjectStore } from '@/stores/subjectStore'
 import { db } from '@/lib/storage'
+import { isLoggedIn, getStoredUser, logout, pushToCloud, pullFromCloud, getMe } from '@/lib/sync'
 
 const DAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 
@@ -32,10 +33,22 @@ export default function SettingsPage() {
   const [newColor, setNewColor] = useState('#6366f1')
   const [newIcon, setNewIcon] = useState('book-open')
   const [clearModalOpen, setClearModalOpen] = useState(false)
+  const [syncLoading, setSyncLoading] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(() => {
+    if (typeof window !== 'undefined') return isLoggedIn()
+    return false
+  })
+  const [user, setUser] = useState<{ id: string; name: string; email: string } | null>(() => {
+    if (typeof window !== 'undefined' && isLoggedIn()) return getStoredUser()
+    return null
+  })
 
   useEffect(() => {
     loadPreferences()
     loadSubjects()
+    if (isLoggedIn()) {
+      getMe().then(u => { if (u) setUser(u) }).catch(() => {})
+    }
   }, [loadPreferences, loadSubjects])
 
   useEffect(() => {
@@ -46,6 +59,38 @@ export default function SettingsPage() {
   const handlePomodoroMode = (mode: 'fixed' | 'adaptive') => {
     updatePreferences({ pomodoroMode: mode })
     toast.success(mode === 'fixed' ? '已切换为固定时长模式' : '已切换为自适应模式')
+  }
+
+  const handlePush = async () => {
+    setSyncLoading(true)
+    try {
+      await pushToCloud()
+      toast.success('数据已上传到云端')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '上传失败')
+    } finally {
+      setSyncLoading(false)
+    }
+  }
+
+  const handlePull = async () => {
+    setSyncLoading(true)
+    try {
+      await pullFromCloud()
+      toast.success('数据已从云端同步')
+      window.location.reload()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '下载失败')
+    } finally {
+      setSyncLoading(false)
+    }
+  }
+
+  const handleLogout = () => {
+    logout()
+    setLoggedIn(false)
+    setUser(null)
+    toast.success('已退出登录')
   }
 
   const handleClearData = async () => {
@@ -345,37 +390,98 @@ export default function SettingsPage() {
         </button>
       </Card>
 
-      {/* 数据 */}
+      {/* 数据 & 云端同步 */}
       <Card>
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2">
           <Database className="w-4 h-4 text-primary" />
-          数据
+          数据与同步
         </h2>
 
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">存储模式</p>
-              <p className="text-xs text-text-muted">本地存储</p>
-            </div>
-            <span className="px-3 py-1 bg-success/10 text-success text-xs rounded-lg font-medium">
-              活跃
-            </span>
+          {loggedIn && user ? (
+            <>
+              <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-xl">
+                <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                  <User className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{user.name}</p>
+                  <p className="text-xs text-text-muted truncate">{user.email}</p>
+                </div>
+                <span className="px-2 py-0.5 bg-success/10 text-success text-xs rounded-full font-medium">
+                  已连接
+                </span>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={handlePush}
+                  disabled={syncLoading}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-border text-sm font-medium hover:bg-bg transition disabled:opacity-50"
+                >
+                  {syncLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  上传
+                </button>
+                <button
+                  onClick={handlePull}
+                  disabled={syncLoading}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-border text-sm font-medium hover:bg-bg transition disabled:opacity-50"
+                >
+                  {syncLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                  下载
+                </button>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 py-2 text-sm text-danger hover:text-danger/80 transition w-full"
+              >
+                <LogOut className="w-4 h-4" />
+                退出登录
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">存储模式</p>
+                  <p className="text-xs text-text-muted">本地存储 (IndexedDB)</p>
+                </div>
+                <span className="px-3 py-1 bg-gray-100 text-text-muted text-xs rounded-lg font-medium flex items-center gap-1">
+                  <CloudOff className="w-3 h-3" />
+                  离线
+                </span>
+              </div>
+              <p className="text-xs text-text-muted">
+                登录后可将数据同步到云端，跨设备使用
+              </p>
+              <div className="flex gap-2">
+                <Link
+                  href="/auth/login"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary-dark transition"
+                >
+                  <Cloud className="w-4 h-4" />
+                  登录
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-border text-sm font-medium hover:bg-bg transition"
+                >
+                  注册
+                </Link>
+              </div>
+            </>
+          )}
+
+          <div className="border-t pt-3">
+            <button
+              onClick={() => setClearModalOpen(true)}
+              className="flex items-center gap-2 py-2 text-sm text-danger hover:text-danger/80 transition"
+            >
+              <Trash2 className="w-4 h-4" />
+              清除所有数据
+            </button>
           </div>
-          <Link
-            href="/auth/login"
-            className="flex items-center gap-2 py-2 text-sm text-text-muted hover:text-primary transition"
-          >
-            <Cloud className="w-4 h-4" />
-            切换到云端同步
-          </Link>
-          <button
-            onClick={() => setClearModalOpen(true)}
-            className="flex items-center gap-2 py-2 text-sm text-danger hover:text-danger/80 transition"
-          >
-            <Trash2 className="w-4 h-4" />
-            清除所有数据
-          </button>
         </div>
       </Card>
 

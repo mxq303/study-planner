@@ -2,18 +2,35 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, UserPlus } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, UserPlus, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
+import { register } from '@/lib/sync'
 import { toast } from 'sonner'
 
 export default function RegisterPage() {
+  const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    toast.info('云端同步功能即将上线，敬请期待')
+    if (password.length < 6) {
+      toast.error('密码至少需要6位')
+      return
+    }
+    setLoading(true)
+    try {
+      await register(name, email, password)
+      toast.success('注册成功，已自动登录')
+      router.push('/settings')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '注册失败')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -35,16 +52,15 @@ export default function RegisterPage() {
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="昵称"
-              className="w-full px-4 py-2.5 border border-border rounded-xl text-sm"
-              required
+              placeholder="昵称（选填）"
+              className="w-full px-4 py-2.5 border border-border rounded-xl text-sm bg-white"
             />
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="邮箱地址"
-              className="w-full px-4 py-2.5 border border-border rounded-xl text-sm"
+              className="w-full px-4 py-2.5 border border-border rounded-xl text-sm bg-white"
               required
             />
             <input
@@ -52,15 +68,17 @@ export default function RegisterPage() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="密码（至少6位）"
-              className="w-full px-4 py-2.5 border border-border rounded-xl text-sm"
+              className="w-full px-4 py-2.5 border border-border rounded-xl text-sm bg-white"
               required
               minLength={6}
             />
             <button
               type="submit"
-              className="w-full py-2.5 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary-dark transition"
+              disabled={loading}
+              className="w-full py-2.5 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary-dark transition disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              注册
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              {loading ? '注册中...' : '注册'}
             </button>
           </form>
           <p className="text-xs text-text-muted mt-4">
