@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail, Loader2, Check, ArrowRight, RefreshCw } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
-export default function VerifyPage() {
+function VerifyForm() {
   const router = useRouter()
   const params = useSearchParams()
   const email = params.get('email') || ''
@@ -125,5 +125,17 @@ export default function VerifyPage() {
         )}
       </Card>
     </div>
+  )
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    }>
+      <VerifyForm />
+    </Suspense>
   )
 }
