@@ -467,3 +467,22 @@ h1, h2, h3, h4, h5, h6 {
 .text-scale-lg {
   font-size: 110%;
 }
+
+/* ===================================================================
+   Gradient Border Animation
+   =================================================================== */
+
+@keyframes gradient-rotate {
+  0%   { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.animate-gradient-rotate {
+  animation: gradient-rotate 4s linear infinite;
+}

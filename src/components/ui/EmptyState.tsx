@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { ClipboardList } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ParticleBg } from '@/components/ui/ParticleBg'
 
 interface EmptyStateProps {
   icon?: ReactNode
@@ -18,7 +19,8 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center py-12 px-4 animate-fade-in', className)}>
+    <div className={cn('relative flex flex-col items-center justify-center py-12 px-4 animate-fade-in', className)}>
+      <ParticleBg />
       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
         {icon || <ClipboardList className="w-8 h-8 text-primary" />}
       </div>

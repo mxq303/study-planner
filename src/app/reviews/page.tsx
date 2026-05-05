@@ -3,6 +3,7 @@
 import { useEffect, useCallback } from 'react'
 import { Check, ChevronRight } from 'lucide-react'
 import { format, isToday, isTomorrow, differenceInDays, parseISO, startOfDay } from 'date-fns'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { cn } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -23,6 +24,9 @@ export default function ReviewsPage() {
     getStreakInfo,
   } = useReviewStore()
   const { tasks, loadTasks } = useTaskStore()
+
+  const [todayRef] = useAutoAnimate()
+  const [upcomingRef] = useAutoAnimate()
 
   useEffect(() => {
     loadReminders()
@@ -105,7 +109,7 @@ export default function ReviewsPage() {
             description={t.reviews.noReviewHint}
           />
         ) : (
-          <div className="space-y-2">
+          <div ref={todayRef} className="space-y-2">
             {todayReminders.map((r, i) => {
               const overdue = differenceInDays(startOfDay(new Date()), startOfDay(parseISO(r.reviewDate))) > 0
               return (
@@ -165,7 +169,7 @@ export default function ReviewsPage() {
             description={t.reviews.noReviewHint}
           />
         ) : (
-          <div className="space-y-2">
+          <div ref={upcomingRef} className="space-y-2">
             {upcomingReminders.map((r, i) => (
               <div key={r.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
                 <Card className="flex items-center gap-3 card-hover">

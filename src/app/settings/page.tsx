@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Trash2, Clock, BookOpen, Database, Info, Link as LinkIcon, Cloud, CloudOff, Upload, Download, Loader2, LogOut, User, Globe, Sun, Palette, LayoutGrid, Type, Layers } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { cn } from '@/lib/utils'
 import { Card } from '@/components/ui/Card'
 import { Modal } from '@/components/ui/Modal'
@@ -29,6 +30,7 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const { preferences, loadPreferences, updatePreferences } = usePreferenceStore()
   const { subjects, loadSubjects, initPresetSubjects, addSubject, updateSubject, deleteSubject } = useSubjectStore()
+  const [subjectsRef] = useAutoAnimate()
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [editSubjectId, setEditSubjectId] = useState<string | null>(null)
   const [newName, setNewName] = useState('')
@@ -555,7 +557,7 @@ export default function SettingsPage() {
           {t.settings.subjectManagement}
         </h2>
 
-        <div className="space-y-2">
+        <div ref={subjectsRef} className="space-y-2">
           {subjects.map(s => (
             <div
               key={s.id}

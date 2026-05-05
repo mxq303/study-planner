@@ -12,6 +12,7 @@ import {
   addDays, isToday, isBefore
 } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useTaskStore } from '@/stores/taskStore'
 import { useSubjectStore } from '@/stores/subjectStore'
 import { usePreferenceStore } from '@/stores/preferenceStore'
@@ -27,6 +28,8 @@ export default function CalendarPage() {
   const { tasks, loadTasks, updateTask } = useTaskStore()
   const { subjects, loadSubjects } = useSubjectStore()
   const { preferences, loadPreferences } = usePreferenceStore()
+
+  const [slotsRef] = useAutoAnimate()
 
   const [currentWeek, setCurrentWeek] = useState(new Date())
   const [slots, setSlots] = useState<ScheduleSlot[]>([])
@@ -214,7 +217,7 @@ export default function CalendarPage() {
             className="py-6"
           />
         ) : (
-          <div className="space-y-2">
+          <div ref={slotsRef} className="space-y-2">
             {todaySlots
               .sort((a, b) => a.startTime.localeCompare(b.startTime))
               .map((slot, i) => (

@@ -3,16 +3,19 @@
 import { useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import {
-  Plus, Sunrise, Sun, Moon, BookOpen, Clock, CheckCircle2,
+  Plus, Sunrise, Sun, Moon, BookOpen, Clock, CheckCircle2, Flame,
   ArrowRight
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useTaskStore } from '@/stores/taskStore'
 import { useSubjectStore } from '@/stores/subjectStore'
 import { usePomodoroStore } from '@/stores/pomodoroStore'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { ParticleBg } from '@/components/ui/ParticleBg'
+import { StatCard } from '@/components/ui/StatCard'
 import { PriorityBadge } from '@/components/ui/PriorityBadge'
 import { getTimeString } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n'
@@ -22,6 +25,9 @@ export default function DashboardPage() {
   const { tasks, completeTask, loadTasks } = useTaskStore()
   const { subjects, loadSubjects } = useSubjectStore()
   const { sessions, loadSessions } = usePomodoroStore()
+
+  const [todayPlanRef] = useAutoAnimate()
+  const [pendingRef] = useAutoAnimate()
 
   useEffect(() => {
     loadTasks()
@@ -86,6 +92,7 @@ export default function DashboardPage() {
         </Link>
         <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10" />
         <div className="absolute -bottom-4 right-12 w-16 h-16 rounded-full bg-white/5" />
+        <ParticleBg />
       </div>
 
       <Card className="card-bg mb-4 card-hover">
@@ -114,7 +121,7 @@ export default function DashboardPage() {
             className="py-6"
           />
         ) : (
-          <div className="space-y-2">
+          <div ref={todayPlanRef} className="space-y-2">
             {todayTasks.slice(0, 5).map((task, i) => {
               const subj = getSubjectById(task.subjectId)
               return (
@@ -159,7 +166,7 @@ export default function DashboardPage() {
             className="py-6"
           />
         ) : (
-          <div className="space-y-1">
+          <div ref={pendingRef} className="space-y-1">
             {pendingTasks.slice(0, 6).map((task, i) => {
               const subj = getSubjectById(task.subjectId)
               return (
@@ -201,15 +208,17 @@ export default function DashboardPage() {
           <Clock className="w-4 h-4 text-primary" />
           {t.home.todayStudy}
         </h2>
-        <div className="flex items-center gap-6">
-            <div className="flex-1 text-center p-3 rounded-xl glass-card">
-            <p className="text-2xl font-bold text-primary">{todayPomodoros}</p>
-            <p className="text-xs text-text-muted mt-0.5">{t.home.pomodoros}</p>
-          </div>
-            <div className="flex-1 text-center p-3 rounded-xl glass-card">
-            <p className="text-2xl font-bold text-primary">{todayMinutes}</p>
-            <p className="text-xs text-text-muted mt-0.5">{t.home.studyMinutes}</p>
-          </div>
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard
+            icon={<Flame className="w-5 h-5" />}
+            label={t.home.pomodoros}
+            value={todayPomodoros}
+          />
+          <StatCard
+            icon={<Clock className="w-5 h-5" />}
+            label={t.home.studyMinutes}
+            value={todayMinutes}
+          />
         </div>
       </Card>
     </div>

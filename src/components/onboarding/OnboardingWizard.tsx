@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Sparkles, CheckSquare, Timer, Rocket, ChevronRight } from 'lucide-react'
+import { ParticleBg } from '@/components/ui/ParticleBg'
 
 interface OnboardingWizardProps {
   onComplete: () => void
@@ -71,8 +72,9 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           </button>
         </div>
 
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-6 animate-bounce-gentle" key={step}>
+        <div className="text-center mb-8 relative">
+          <ParticleBg />
+          <div className="w-20 h-20 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-6 animate-bounce-gentle relative z-10" key={step}>
             <s.icon className="w-10 h-10" />
           </div>
           <h2 className="text-xl font-bold mb-3 animate-fade-in" key={s.titleKey}>{s.title}</h2>

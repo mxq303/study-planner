@@ -8,6 +8,7 @@ import {
   Play, CheckCircle2, Sparkles, Edit3, Save, X, AlertTriangle
 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useTaskStore } from '@/stores/taskStore'
 import { useSubjectStore } from '@/stores/subjectStore'
 import { Card } from '@/components/ui/Card'
@@ -33,6 +34,8 @@ export default function TaskDetailPage() {
 
   const { tasks, updateTask, deleteTask, completeTask } = useTaskStore()
   const { subjects } = useSubjectStore()
+
+  const [subtaskRef] = useAutoAnimate()
 
   const task = tasks.find(t => t.id === id)
   const subject = subjects.find(s => s.id === task?.subjectId)
@@ -306,7 +309,7 @@ export default function TaskDetailPage() {
               <span className="ml-1 text-xs text-primary font-normal">{locale === 'zh-CN' ? 'AI生成' : 'AI generated'}</span>
             )}
           </h3>
-          <div className="space-y-2">
+          <div ref={subtaskRef} className="space-y-2">
             {subtasks.map((sub, i) => (
               <Card
                 key={sub.id}

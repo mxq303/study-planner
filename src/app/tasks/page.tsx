@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Plus, CheckCircle2, Circle, Clock, Calendar } from 'lucide-react'
+import { Plus, CheckCircle2, Circle, Clock, Calendar, GripVertical } from 'lucide-react'
 import { format } from 'date-fns'
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useTaskStore } from '@/stores/taskStore'
 import { useSubjectStore } from '@/stores/subjectStore'
 import { Card } from '@/components/ui/Card'
@@ -117,11 +119,17 @@ export default function TasksPage() {
   const { tasks, loadTasks, completeTask } = useTaskStore()
   const { subjects, loadSubjects } = useSubjectStore()
   const [activeTab, setActiveTab] = useState<TaskStatus | 'all'>('all')
+  const [listRef] = useAutoAnimate()
 
   useEffect(() => {
     loadTasks()
     loadSubjects()
   }, [loadTasks, loadSubjects])
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return
+    console.log('Moved from', result.source.index, 'to', result.destination.index)
+  }
 
   const STATUS_TABS: { key: TaskStatus | 'all'; label: string }[] = [
     { key: 'all', label: t.tasks.all },
@@ -134,18 +142,6 @@ export default function TasksPage() {
     if (activeTab === 'all') return tasks
     return tasks.filter(t => t.status === activeTab)
   }, [tasks, activeTab])
-
-  const groupedTasks = useMemo(() => {
-    const groups: Record<string, typeof tasks> = {
-      in_progress: [],
-      pending: [],
-      completed: [],
-    }
-    for (const t of filteredTasks) {
-      groups[t.status]?.push(t)
-    }
-    return groups
-  }, [filteredTasks])
 
   const getSubjectById = (id?: string) => subjects.find(s => s.id === id)
 
@@ -206,37 +202,45 @@ export default function TasksPage() {
             ) : undefined
           }
         />
-      ) : activeTab === 'all' ? (
-        <div className="space-y-4">
-          {(['in_progress', 'pending', 'completed'] as TaskStatus[]).map(status => {
-            const list = groupedTasks[status]
-            if (!list?.length) return null
-            return (
-              <div key={status}>
-                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 px-1">
-                  {statusLabelMap[status]}
-                  <span className="ml-1 font-normal normal-case">({list.length})</span>
-                </h3>
-                <div className="space-y-2">
-                  {list.map((task, i) => (
-                    <div key={task.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
-                      <TaskCard
-                        task={task}
-                        subject={getSubjectById(task.subjectId)}
-                        onComplete={() => completeTask(task.id)}
-                        statusLabel={statusLabelMap[task.status]}
-                        minutesLabel={t.tasks.minutes}
-                        priorityLabels={t.tasks.priorityLevels}
-                      />
-                    </div>
-                  ))}
-                </div>
+      ) : (activeTab === 'all' || activeTab === 'pending') ? (
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="task-list">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
+                {filteredTasks.map((task, index) => (
+                  <Draggable key={task.id} draggableId={task.id} index={index}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={snapshot.isDragging ? 'opacity-80 shadow-lg rounded-xl' : ''}
+                      >
+                        <div className="flex items-center gap-1">
+                          <div {...provided.dragHandleProps} className="p-1 text-text-muted hover:text-text cursor-grab active:cursor-grabbing">
+                            <GripVertical className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1">
+                            <TaskCard
+                              task={task}
+                              subject={getSubjectById(task.subjectId)}
+                              onComplete={() => completeTask(task.id)}
+                              statusLabel={statusLabelMap[task.status]}
+                              minutesLabel={t.tasks.minutes}
+                              priorityLabels={t.tasks.priorityLevels}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-            )
-          })}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       ) : (
-        <div className="space-y-2">
+        <div ref={listRef} className="space-y-2">
           {filteredTasks.map((task, i) => (
             <div key={task.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
               <TaskCard
