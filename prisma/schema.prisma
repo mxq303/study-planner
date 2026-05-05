@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String?   @unique
+  passwordHash  String?
+  storageMode   String    @default("local")
+  avatarUrl     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  subjects         Subject[]
+  tasks            Task[]
+  pomodoroSessions PomodoroSession[]
+  reviewReminders  ReviewReminder[]
+  preferences      UserPreference?
+}
+
+model Subject {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String   @default("#6366f1")
+  icon      String   @default("book")
+  sortOrder Int      @default(0)
+  isPreset  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@index([userId])
+}
+
+model Task {
+  id              String    @id @default(cuid())
+  userId          String
+  subjectId       String?
+  parentTaskId    String?
+  title           String
+  description     String?
+  priority        Int       @default(3)
+  estimatedMinutes Int
+  deadline        DateTime?
+  scheduledDate   DateTime?
+  scheduledStart  String?
+  status          String    @default("pending")
+  isAiDecomposed  Boolean   @default(false)
+  aiSuggestions   Json?
+  actualMinutes   Int?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject    Subject?   @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  parentTask Task?      @relation("SubTasks", fields: [parentTaskId], references: [id], onDelete: SetNull)
+  subTasks   Task[]     @relation("SubTasks")
+  pomodoroSessions PomodoroSession[]
+  reviewReminders  ReviewReminder[]
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([userId, scheduledDate])
+  @@index([userId, deadline])
+}
+
+model PomodoroSession {
+  id              String    @id @default(cuid())
+  userId          String
+  taskId          String?
+  mode            String    @default("focus")
+  durationMinutes Int
+  startedAt       DateTime  @default(now())
+  endedAt         DateTime?
+  isCompleted     Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([userId, createdAt])
+}
+
+model ReviewReminder {
+  id            String    @id @default(cuid())
+  userId        String
+  taskId        String
+  stage         Int
+  reviewDate    DateTime
+  isCompleted   Boolean   @default(false)
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([userId, reviewDate])
+  @@index([userId, isCompleted])
+}
+
+model UserPreference {
+  id                    String  @id @default(cuid())
+  userId                String  @unique
+  pomodoroMode          String  @default("fixed")
+  pomodoroFocusMinutes  Int     @default(25)
+  pomodoroBreakMinutes  Int     @default(5)
+  pomodoroLongBreakMinutes Int  @default(15)
+  pomodoroLongBreakInterval Int @default(4)
+  dailyStudyStart       String  @default("19:00")
+  dailyStudyEnd         String  @default("22:00")
+  weeklyOffDays         Int[]   @default([0, 6])
+  theme                 String  @default("light")
+  language              String  @default("zh-CN")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
