@@ -120,7 +120,7 @@ export default function DecomposePage() {
   }
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 animate-fade-in">
       <PageHeader title={t.tasks.aiDecompose} backHref={`/tasks/${id}`} />
 
       {showConfig && (
@@ -221,7 +221,7 @@ export default function DecomposePage() {
 
           <div className="space-y-2 mb-4">
             {suggestions.map((s, i) => (
-              <Card key={i} className="relative pr-12">
+              <Card key={i} className="relative pr-12 animate-scale-in">
                 <button
                   onClick={() => handleRemoveSubtask(i)}
                   className="absolute top-3 right-3 p-1 text-text-muted hover:text-danger transition-colors"

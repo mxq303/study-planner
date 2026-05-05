@@ -18,7 +18,7 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <div className={cn('flex flex-col items-center justify-center py-12 px-4', className)}>
+    <div className={cn('flex flex-col items-center justify-center py-12 px-4 animate-fade-in', className)}>
       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
         {icon || <ClipboardList className="w-8 h-8 text-primary" />}
       </div>

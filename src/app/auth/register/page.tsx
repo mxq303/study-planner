@@ -48,7 +48,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 animate-fade-in">
       <div className="w-full max-w-md">
         <Link href="/settings" className="inline-flex items-center text-sm text-text-muted mb-8 hover:text-text transition-colors">
           <ArrowLeft className="w-4 h-4 mr-1.5" /> {t.common.back}
@@ -71,7 +71,7 @@ export default function RegisterPage() {
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="你的昵称"
-                  className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl text-sm bg-surface text-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
                 />
               </div>
             </div>
@@ -86,7 +86,7 @@ export default function RegisterPage() {
                   onChange={e => { setEmail(e.target.value); setErrors(p => ({ ...p, email: undefined })) }}
                   placeholder="name@example.com"
                   className={cn(
-                    'w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm transition-colors',
+                    'w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm transition-colors bg-surface text-text',
                     'focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20',
                     errors.email ? 'border-danger' : 'border-border'
                   )}
@@ -105,7 +105,7 @@ export default function RegisterPage() {
                   onChange={e => { setPassword(e.target.value); setErrors(p => ({ ...p, password: undefined })) }}
                   placeholder="••••••"
                   className={cn(
-                    'w-full pl-10 pr-10 py-2.5 border rounded-xl text-sm transition-colors',
+                    'w-full pl-10 pr-10 py-2.5 border rounded-xl text-sm transition-colors bg-surface text-text',
                     'focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20',
                     errors.password ? 'border-danger' : 'border-border'
                   )}
@@ -131,7 +131,7 @@ export default function RegisterPage() {
                   onChange={e => { setConfirmPassword(e.target.value); setErrors(p => ({ ...p, confirmPassword: undefined })) }}
                   placeholder="••••••"
                   className={cn(
-                    'w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm transition-colors',
+                    'w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm transition-colors bg-surface text-text',
                     'focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20',
                     errors.confirmPassword ? 'border-danger' : 'border-border'
                   )}

@@ -17,7 +17,7 @@ export function BottomNav() {
     { href: '/settings', label: t.nav.settings, icon: User },
   ]
   return (
-    <nav className="fixed bottom-0 left-0 right-0 card-bg border-t z-50 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 card-bg border-t z-50 md:hidden pb-[env(safe-area-inset-bottom)]">
       <div className="flex justify-around py-1">
         {tabs.map(tab => {
           const active = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href)

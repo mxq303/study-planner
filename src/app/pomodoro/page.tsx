@@ -4,6 +4,7 @@ import { useEffect, useCallback, useState, useRef } from 'react'
 import { Play, Pause, RotateCcw, Timer, Flame } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/Card'
+import { WhiteNoise } from '@/components/pomodoro/WhiteNoise'
 import { useI18n } from '@/lib/i18n'
 import { usePomodoroStore } from '@/stores/pomodoroStore'
 import { usePreferenceStore } from '@/stores/preferenceStore'
@@ -158,13 +159,13 @@ export default function PomodoroPage() {
 
         {/* Circular progress */}
         <div className="relative flex items-center justify-center mb-6">
-          <svg width="280" height="280" className="-rotate-90">
+          <svg viewBox="0 0 280 280" className="w-[280px] max-w-full h-auto -rotate-90">
             <circle
               cx="140"
               cy="140"
               r={radius}
               fill="none"
-              stroke="#e2e8f0"
+              stroke="var(--color-border)"
               strokeWidth="10"
               className="animate-pulse-ring"
             />
@@ -244,6 +245,11 @@ export default function PomodoroPage() {
             {min}min
           </button>
         ))}
+      </div>
+
+      {/* White Noise */}
+      <div className="flex justify-center">
+        <WhiteNoise />
       </div>
 
       {/* Today's stats */}

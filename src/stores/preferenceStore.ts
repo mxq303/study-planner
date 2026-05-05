@@ -43,6 +43,12 @@ export const usePreferenceStore = create<PreferenceStore>((set, get) => ({
       weeklyOffDays: [0, 6],
       theme: 'light',
       language: 'zh-CN',
+      weeklyGoalMinutes: 300,
+      notificationEnabled: false,
+      notificationTime: '20:00',
+      soundEnabled: true,
+      accentColor: '#6366f1',
+      onboardingCompleted: false,
     }
     await db.userPreferences.add(pref)
     set({ preferences: pref })

@@ -73,6 +73,12 @@ export interface UserPreference {
   weeklyOffDays: number[]
   theme: string
   language: string
+  weeklyGoalMinutes: number
+  notificationEnabled: boolean
+  notificationTime: string
+  soundEnabled: boolean
+  accentColor: string
+  onboardingCompleted: boolean
 }
 
 export interface ScheduleSlot {

@@ -165,11 +165,11 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-4 pb-4 animate-fade-in">
       <h1 className="text-lg font-bold text-text">{t.settings.title}</h1>
 
       {/* Language */}
-      <Card className="card-bg">
+      <Card className="card-bg animate-slide-up stagger-1">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Globe className="w-4 h-4 text-primary" />
           {t.settings.language}
@@ -201,7 +201,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Theme */}
-      <Card className="card-bg">
+      <Card className="card-bg animate-slide-up stagger-2">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Sun className="w-4 h-4 text-primary" />
           {t.settings.theme}
@@ -244,7 +244,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Pomodoro Settings */}
-      <Card className="card-bg">
+      <Card className="card-bg animate-slide-up stagger-3">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Clock className="w-4 h-4 text-primary" />
           {t.settings.pomodoroSettings}
@@ -363,7 +363,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Study Time */}
-      <Card className="card-bg">
+      <Card className="card-bg animate-slide-up stagger-4">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Clock className="w-4 h-4 text-primary" />
           {t.settings.studyTime}
@@ -419,7 +419,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Subject Management */}
-      <Card className="card-bg">
+      <Card className="card-bg animate-slide-up stagger-5">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <BookOpen className="w-4 h-4 text-primary" />
           {t.settings.subjectManagement}
@@ -438,26 +438,18 @@ export default function SettingsPage() {
                 {s.name[0]}
               </div>
               <p className="flex-1 text-sm font-medium text-text">{s.name}</p>
-              {s.isPreset ? (
-                <span className="text-[10px] text-text-muted bg-bg px-2 py-0.5 rounded">
-                  {locale === 'zh-CN' ? '预置' : 'Preset'}
-                </span>
-              ) : (
-                <button
-                  onClick={() => openEditModal(s.id)}
-                  className="text-xs text-primary font-medium"
-                >
-                  {locale === 'zh-CN' ? '编辑' : 'Edit'}
-                </button>
-              )}
-              {!s.isPreset && (
-                <button
-                  onClick={() => deleteSubject(s.id)}
-                  className="p-1 text-text-muted hover:text-danger transition"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              )}
+              <button
+                onClick={() => openEditModal(s.id)}
+                className="text-xs text-primary font-medium"
+              >
+                {locale === 'zh-CN' ? '编辑' : 'Edit'}
+              </button>
+              <button
+                onClick={() => deleteSubject(s.id)}
+                className="p-1 text-text-muted hover:text-danger transition"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
           ))}
         </div>
@@ -471,7 +463,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* Data & Sync */}
-      <Card className="card-bg">
+      <Card className="card-bg animate-slide-up stagger-6">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Database className="w-4 h-4 text-primary" />
           {t.settings.data}
@@ -566,7 +558,7 @@ export default function SettingsPage() {
       </Card>
 
       {/* About */}
-      <Card className="card-bg">
+      <Card className="card-bg animate-slide-up stagger-7">
         <h2 className="text-sm font-semibold mb-4 flex items-center gap-2 text-text">
           <Info className="w-4 h-4 text-primary" />
           {t.settings.about}
@@ -619,7 +611,7 @@ export default function SettingsPage() {
                   className="w-7 h-7 rounded-full border-2 transition"
                   style={{
                     backgroundColor: c,
-                    borderColor: newColor === c ? '#1e293b' : 'transparent',
+                    borderColor: newColor === c ? 'var(--color-text)' : 'transparent',
                   }}
                 />
               ))}
