@@ -24,22 +24,22 @@ export function Heatmap({ data, dayLabels }: HeatmapProps) {
   const labels = dayLabels || DEFAULT_LABELS
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex gap-1.5">
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-1.5 sm:gap-2">
         {entries.map(([date, minutes], i) => (
-          <div key={date} className="flex-1 flex flex-col items-center gap-1">
+          <div key={date} className="flex-1 flex flex-col items-center gap-1 min-w-0">
             <div
-              className={`w-full aspect-square rounded-lg ${getIntensityColor(minutes, max)}`}
+              className={`w-full min-h-[2rem] sm:min-h-[2.5rem] aspect-square rounded-lg ${getIntensityColor(minutes, max)}`}
               title={`${minutes}分钟`}
             />
-            <span className="text-[10px] text-text-muted">{labels[i]}</span>
+            <span className="text-[10px] sm:text-xs text-text-muted">{labels[i]}</span>
             {minutes > 0 && (
-              <span className="text-[10px] text-text font-medium">{minutes}m</span>
+              <span className="text-[10px] sm:text-xs text-text font-medium truncate w-full text-center">{minutes}m</span>
             )}
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-end gap-1 text-[10px] text-text-muted">
+      <div className="flex items-center justify-end gap-1 text-[10px] sm:text-xs text-text-muted">
         <span>少</span>
         <div className="w-3 h-3 rounded bg-surface" />
         <div className="w-3 h-3 rounded bg-primary/20" />

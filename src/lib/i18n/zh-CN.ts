@@ -15,6 +15,7 @@ const zhCN = {
     tasks: '任务',
     pomodoro: '番茄钟',
     reviews: '复习',
+    stats: '统计',
     settings: '设置',
   },
   home: {

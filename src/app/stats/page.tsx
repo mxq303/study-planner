@@ -165,42 +165,42 @@ export default function StatsPage() {
         ))}
       </div>
 
-      {/* Stats summary grid */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-1 card-hover">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Flame className="w-5 h-5 text-primary" />
+      {/* Stats summary grid - responsive: 2 cols on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-1 card-hover p-3 sm:p-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           </div>
-          <div>
-            <p className="text-xl font-bold text-text">{totalHours}h</p>
-            <p className="text-xs text-text-muted">{t.stats.totalHours}</p>
-          </div>
-        </Card>
-        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-2 card-hover">
-          <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-            <CheckCircle className="w-5 h-5 text-success" />
-          </div>
-          <div>
-            <p className="text-xl font-bold text-text">{tasksCompleted}</p>
-            <p className="text-xs text-text-muted">{t.stats.tasksCompleted}</p>
+          <div className="min-w-0">
+            <p className="text-lg sm:text-xl font-bold text-text truncate">{totalHours}h</p>
+            <p className="text-[11px] sm:text-xs text-text-muted">{t.stats.totalHours}</p>
           </div>
         </Card>
-        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-3 card-hover">
-          <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
-            <Timer className="w-5 h-5 text-warning" />
+        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-2 card-hover p-3 sm:p-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
+            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-success" />
           </div>
-          <div>
-            <p className="text-xl font-bold text-text">{pomodoroCount}</p>
-            <p className="text-xs text-text-muted">{t.stats.pomodoroCount}</p>
+          <div className="min-w-0">
+            <p className="text-lg sm:text-xl font-bold text-text truncate">{tasksCompleted}</p>
+            <p className="text-[11px] sm:text-xs text-text-muted">{t.stats.tasksCompleted}</p>
           </div>
         </Card>
-        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-4 card-hover">
-          <div className="w-10 h-10 rounded-xl bg-danger/10 flex items-center justify-center">
-            <Zap className="w-5 h-5 text-danger" />
+        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-3 card-hover p-3 sm:p-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-warning/10 flex items-center justify-center flex-shrink-0">
+            <Timer className="w-4 h-4 sm:w-5 sm:h-5 text-warning" />
           </div>
-          <div>
-            <p className="text-xl font-bold text-text">{streak}{t.stats.day}</p>
-            <p className="text-xs text-text-muted">{t.stats.currentStreak}</p>
+          <div className="min-w-0">
+            <p className="text-lg sm:text-xl font-bold text-text truncate">{pomodoroCount}</p>
+            <p className="text-[11px] sm:text-xs text-text-muted">{t.stats.pomodoroCount}</p>
+          </div>
+        </Card>
+        <Card className="flex items-center gap-3 animate-bounce-gentle stagger-4 card-hover p-3 sm:p-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-danger/10 flex items-center justify-center flex-shrink-0">
+            <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-danger" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-lg sm:text-xl font-bold text-text truncate">{streak}{t.stats.day}</p>
+            <p className="text-[11px] sm:text-xs text-text-muted">{t.stats.currentStreak}</p>
           </div>
         </Card>
       </div>

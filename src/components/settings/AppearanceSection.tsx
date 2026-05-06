@@ -22,6 +22,16 @@ export function AppearanceSection() {
   const { theme, setTheme } = useTheme()
   const { preferences, updatePreferences } = usePreferenceStore()
 
+  const handleSetTheme = (newTheme: 'light' | 'dark' | 'system') => {
+    setTheme(newTheme)
+    updatePreferences({ theme: newTheme })
+  }
+
+  const handleSetLocale = (newLocale: 'zh-CN' | 'en-US') => {
+    setLocale(newLocale)
+    updatePreferences({ language: newLocale })
+  }
+
   if (!preferences) return null
 
   const accentColor = preferences.accentColor || '#6366f1'
@@ -42,11 +52,11 @@ export function AppearanceSection() {
         </div>
         <div className="flex gap-1 bg-hover rounded-full p-1">
           <button
-            onClick={() => setLocale('zh-CN')}
+            onClick={() => handleSetLocale('zh-CN')}
             className={cn(btnBase, locale === 'zh-CN' ? 'bg-surface text-text shadow-sm' : 'text-text-muted hover:text-text')}
           >中文</button>
           <button
-            onClick={() => setLocale('en-US')}
+            onClick={() => handleSetLocale('en-US')}
             className={cn(btnBase, locale === 'en-US' ? 'bg-surface text-text shadow-sm' : 'text-text-muted hover:text-text')}
           >English</button>
         </div>
@@ -59,15 +69,15 @@ export function AppearanceSection() {
           <h3 className="text-sm font-semibold text-text">{t.settings.theme}</h3>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <button onClick={() => setTheme('light')} className={cn('flex flex-col items-center gap-1 py-3 rounded-xl border transition-all', theme === 'light' ? 'border-primary bg-primary/5 text-primary' : 'border-border text-text-muted hover:text-text')}>
+          <button onClick={() => handleSetTheme('light')} className={cn('flex flex-col items-center gap-1 py-3 rounded-xl border transition-all', theme === 'light' ? 'border-primary bg-primary/5 text-primary' : 'border-border text-text-muted hover:text-text')}>
             <Sun className="w-5 h-5" />
             <span className="text-xs">{t.settings.lightMode}</span>
           </button>
-          <button onClick={() => setTheme('dark')} className={cn('flex flex-col items-center gap-1 py-3 rounded-xl border transition-all', theme === 'dark' ? 'border-primary bg-primary/5 text-primary' : 'border-border text-text-muted hover:text-text')}>
+          <button onClick={() => handleSetTheme('dark')} className={cn('flex flex-col items-center gap-1 py-3 rounded-xl border transition-all', theme === 'dark' ? 'border-primary bg-primary/5 text-primary' : 'border-border text-text-muted hover:text-text')}>
             <Moon className="w-5 h-5" />
             <span className="text-xs">{t.settings.darkMode}</span>
           </button>
-          <button onClick={() => setTheme('system')} className={cn('flex flex-col items-center gap-1 py-3 rounded-xl border transition-all', theme === 'system' ? 'border-primary bg-primary/5 text-primary' : 'border-border text-text-muted hover:text-text')}>
+          <button onClick={() => handleSetTheme('system')} className={cn('flex flex-col items-center gap-1 py-3 rounded-xl border transition-all', theme === 'system' ? 'border-primary bg-primary/5 text-primary' : 'border-border text-text-muted hover:text-text')}>
             <Monitor className="w-5 h-5" />
             <span className="text-xs">{t.settings.systemMode}</span>
           </button>

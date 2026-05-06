@@ -15,6 +15,7 @@ const enUS = {
     tasks: 'Tasks',
     pomodoro: 'Pomodoro',
     reviews: 'Reviews',
+    stats: 'Stats',
     settings: 'Settings',
   },
   home: {

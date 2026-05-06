@@ -15,7 +15,7 @@ export function Sidebar() {
     { href: '/tasks', label: t.nav.tasks, icon: CheckSquare },
     { href: '/pomodoro', label: t.nav.pomodoro, icon: Timer },
     { href: '/reviews', label: t.nav.reviews, icon: Brain },
-    { href: '/stats', label: '统计', icon: BarChart3 },
+    { href: '/stats', label: t.nav.stats, icon: BarChart3 },
     { href: '/settings', label: t.nav.settings, icon: User },
   ]
   const loggedIn = typeof window !== 'undefined' && isLoggedIn()
