@@ -233,7 +233,7 @@ export default function NewTaskPage() {
                 onChange={e => setEstimatedMinutes(Number(e.target.value) || 30)}
                 min={5}
                 max={480}
-                className="w-20 px-2 py-1.5 rounded-lg border border-border bg-surface text-xs text-text text-center outline-none focus:border-primary"
+                className="w-20 px-2 py-1.5 rounded-lg border border-border bg-surface text-sm text-text text-center outline-none focus:border-primary"
                 placeholder={locale === 'zh-CN' ? '自定义' : 'Custom'}
               />
             </div>

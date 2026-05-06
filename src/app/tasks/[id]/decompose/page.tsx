@@ -9,7 +9,6 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useTaskStore } from '@/stores/taskStore'
 import { useSubjectStore } from '@/stores/subjectStore'
-import { decomposeTaskWithAI } from '@/lib/ai'
 import { useI18n } from '@/lib/i18n'
 import type { AITaskSuggestion } from '@/types'
 
@@ -29,26 +28,6 @@ export default function DecomposePage() {
   const { subjects } = useSubjectStore()
   const [loading, setLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<AITaskSuggestion[]>([])
-  const [apiKey, setApiKey] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('cf_api_key') || ''
-    }
-    return ''
-  })
-  const [accountId, setAccountId] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('cf_account_id') || ''
-    }
-    return ''
-  })
-  const [showConfig, setShowConfig] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const key = localStorage.getItem('cf_api_key')
-      const id = localStorage.getItem('cf_account_id')
-      return !key || !id
-    }
-    return true
-  })
 
   const task = tasks.find(t => t.id === id)
   const subject = subjects.find(s => s.id === task?.subjectId)
@@ -56,28 +35,23 @@ export default function DecomposePage() {
 
   const handleDecompose = async () => {
     if (!task) return
-    if (!apiKey || !accountId) {
-      setShowConfig(true)
-      toast.error(locale === 'zh-CN' ? '请先配置 Cloudflare API 密钥' : 'Please configure Cloudflare API key first')
-      return
-    }
-
     setLoading(true)
     try {
-      localStorage.setItem('cf_api_key', apiKey)
-      localStorage.setItem('cf_account_id', accountId)
-
-      const results = await decomposeTaskWithAI(
-        task.title,
-        subject?.name || (locale === 'zh-CN' ? '未分类' : 'Uncategorized'),
-        task.estimatedMinutes,
-        task.deadline || new Date().toISOString(),
-        apiKey,
-        accountId
-      )
-      setSuggestions(results)
-    } catch {
-      toast.error(locale === 'zh-CN' ? 'AI 拆解失败，请检查 API 配置' : 'AI decomposition failed, check API config')
+      const res = await fetch('/api/ai/decompose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: task.title,
+          subject: subject?.name || '未分类',
+          totalMinutes: task.estimatedMinutes,
+          deadline: task.deadline || new Date().toISOString(),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'AI 拆解失败')
+      setSuggestions(data.suggestions)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'AI 拆解失败')
     } finally {
       setLoading(false)
     }
@@ -122,45 +96,6 @@ export default function DecomposePage() {
   return (
     <div className="pb-4 animate-fade-in">
       <PageHeader title={t.tasks.aiDecompose} backHref={`/tasks/${id}`} />
-
-      {showConfig && (
-        <Card className="mb-4">
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-warning" />
-            {locale === 'zh-CN' ? 'Cloudflare Workers AI 配置' : 'Cloudflare Workers AI Config'}
-          </h3>
-          <p className="text-xs text-text-muted mb-3">
-            {locale === 'zh-CN' ? '请填入你的 Cloudflare Account ID 和 API Token（需要有 Workers AI 权限）' : 'Enter your Cloudflare Account ID and API Token (requires Workers AI permission)'}
-          </p>
-          <div className="space-y-2">
-            <input
-              type="text"
-              value={accountId}
-              onChange={e => setAccountId(e.target.value)}
-              placeholder="Account ID"
-              className="w-full px-3 py-2 border border-border bg-surface rounded-lg text-sm text-text placeholder:text-text-muted outline-none"
-            />
-            <input
-              type="password"
-              value={apiKey}
-              onChange={e => setApiKey(e.target.value)}
-              placeholder="API Token"
-              className="w-full px-3 py-2 border border-border bg-surface rounded-lg text-sm text-text placeholder:text-text-muted outline-none"
-            />
-            <button
-              onClick={() => {
-                localStorage.setItem('cf_api_key', apiKey)
-                localStorage.setItem('cf_account_id', accountId)
-                setShowConfig(false)
-                toast.success(locale === 'zh-CN' ? '配置已保存' : 'Config saved')
-              }}
-              className="w-full py-2 bg-primary text-white rounded-lg text-sm font-medium"
-            >
-              {t.common.save}
-            </button>
-          </div>
-        </Card>
-      )}
 
       <Card className="mb-4">
         <h3 className="text-sm font-semibold mb-2">{locale === 'zh-CN' ? '任务信息' : 'Task Info'}</h3>

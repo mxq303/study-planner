@@ -181,13 +181,12 @@ export default function PomodoroPage() {
               strokeWidth="10"
               strokeLinecap="round"
               strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
               className="animate-progress"
               style={{ '--progress-full': circumference, '--progress-current': strokeDashoffset } as React.CSSProperties}
             />
           </svg>
           <div className="absolute flex flex-col items-center">
-            <span className="text-5xl font-bold tabular-nums tracking-tight text-text animate-bounce-gentle" style={{ textShadow: '0 2px 10px rgba(99,102,241,0.3)' }}>
+            <span key={timer.secondsLeft} className="text-5xl font-bold tabular-nums tracking-tight text-text animate-bounce-gentle" style={{ textShadow: '0 2px 10px rgba(99,102,241,0.3)' }}>
               {formatTime(timer.secondsLeft)}
             </span>
             <span className="text-sm text-text-muted mt-1">

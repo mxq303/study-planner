@@ -1,15 +1,19 @@
 import type { AITaskSuggestion } from '@/types'
 
+const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID || ''
+const CF_API_KEY = process.env.CF_API_KEY || ''
 const CF_API_BASE = 'https://api.cloudflare.com/client/v4'
 
 export async function decomposeTaskWithAI(
   title: string,
   subject: string,
   totalMinutes: number,
-  deadline: string,
-  apiKey: string,
-  accountId: string
+  deadline: string
 ): Promise<AITaskSuggestion[]> {
+  if (!CF_API_KEY || !CF_ACCOUNT_ID) {
+    throw new Error('AI 服务未配置，请在环境变量中设置 CF_API_KEY 和 CF_ACCOUNT_ID')
+  }
+
   const daysLeft = Math.max(1, Math.ceil(
     (new Date(deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   ))
@@ -28,11 +32,11 @@ export async function decomposeTaskWithAI(
 [{"subtaskTitle":"梳理知识点框架","estimatedMinutes":30,"suggestedPomodoros":1,"strategy":"先通读教材目录，建立知识结构图"}]`
 
   const response = await fetch(
-    `${CF_API_BASE}/accounts/${accountId}/ai/run/@cf/meta/llama-3-8b-instruct-awq`,
+    `${CF_API_BASE}/accounts/${CF_ACCOUNT_ID}/ai/run/@cf/meta/llama-3-8b-instruct-awq`,
     {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${CF_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -54,9 +58,7 @@ export async function decomposeTaskWithAI(
 
   try {
     const jsonMatch = content.match(/\[[\s\S]*\]/)
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]) as AITaskSuggestion[]
-    }
+    if (jsonMatch) return JSON.parse(jsonMatch[0]) as AITaskSuggestion[]
     return JSON.parse(content) as AITaskSuggestion[]
   } catch {
     throw new Error('Failed to parse AI response')
@@ -65,45 +67,40 @@ export async function decomposeTaskWithAI(
 
 export async function suggestTaskDifficulty(
   title: string,
-  subject: string,
-  apiKey: string,
-  accountId: string
+  subject: string
 ): Promise<string> {
-  const prompt = `请根据以下任务信息，判断该任务最适合的学习类型。只返回以下四种之一：背诵/记忆、逻辑/理解、复习/做题、写作/创作。
+  if (!CF_API_KEY || !CF_ACCOUNT_ID) return '复习/做题'
 
+  const prompt = `请根据以下任务信息，判断该任务最适合的学习类型。只返回四种之一：背诵/记忆、逻辑/理解、复习/做题、写作/创作。
 任务标题: ${title}
 科目: ${subject}
+只返回类型名称。`
 
-只返回类型名称，不要包含其他文字。`
-
-  const response = await fetch(
-    `${CF_API_BASE}/accounts/${accountId}/ai/run/@cf/meta/llama-3-8b-instruct-awq`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: '你是一位教育专家。请只返回学习类型分类。' },
-          { role: 'user', content: prompt },
-        ],
-        max_tokens: 50,
-      }),
-    }
-  )
-
-  if (!response.ok) {
+  try {
+    const response = await fetch(
+      `${CF_API_BASE}/accounts/${CF_ACCOUNT_ID}/ai/run/@cf/meta/llama-3-8b-instruct-awq`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${CF_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: '你是一位教育专家。请只返回学习类型分类。' },
+            { role: 'user', content: prompt },
+          ],
+          max_tokens: 50,
+        }),
+      }
+    )
+    if (!response.ok) return '复习/做题'
+    const data = await response.json()
+    const content = (data.result?.response || '').trim()
+    const types = ['背诵/记忆', '逻辑/理解', '复习/做题', '写作/创作']
+    for (const t of types) if (content.includes(t)) return t
+    return '复习/做题'
+  } catch {
     return '复习/做题'
   }
-
-  const data = await response.json()
-  const types = ['背诵/记忆', '逻辑/理解', '复习/做题', '写作/创作']
-  const content = (data.result?.response || '').trim()
-
-  for (const t of types) {
-    if (content.includes(t)) return t
-  }
-  return '复习/做题'
 }

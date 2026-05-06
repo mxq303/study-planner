@@ -216,7 +216,7 @@ export default function TasksPage() {
                         className={snapshot.isDragging ? 'opacity-80 shadow-lg rounded-xl' : ''}
                       >
                         <div className="flex items-center gap-1">
-                          <div {...provided.dragHandleProps} className="p-1 text-text-muted hover:text-text cursor-grab active:cursor-grabbing">
+                          <div {...provided.dragHandleProps} className="p-2 text-text-muted hover:text-text cursor-grab active:cursor-grabbing">
                             <GripVertical className="w-4 h-4" />
                           </div>
                           <div className="flex-1">

@@ -144,7 +144,7 @@ export function WhiteNoise() {
       </button>
 
       {showPanel && (
-        <div className="absolute bottom-full mb-2 right-0 card-bg border border-border rounded-2xl p-4 shadow-xl w-64 animate-slide-up z-10">
+        <div className="absolute bottom-full mb-2 right-0 card-bg border border-border rounded-2xl p-4 shadow-xl w-64 max-w-[90vw] animate-slide-up z-10">
           <div className="grid grid-cols-2 gap-1.5 mb-3">
             {soundOptions.map(opt => (
               <button
