@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
-import { Check, ChevronRight } from 'lucide-react'
+import { useEffect, useCallback, useMemo } from 'react'
+import { Check, ChevronRight, AlertTriangle } from 'lucide-react'
 import { format, isToday, isTomorrow, differenceInDays, parseISO, startOfDay } from 'date-fns'
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { cn } from '@/lib/utils'
@@ -20,12 +20,14 @@ export default function ReviewsPage() {
     loadReminders,
     completeReminder,
     getTodayReminders,
+    getOverdueReminders,
     getUpcomingReminders,
     getStreakInfo,
   } = useReviewStore()
   const { tasks, loadTasks } = useTaskStore()
 
   const [todayRef] = useAutoAnimate()
+  const [overdueRef] = useAutoAnimate()
   const [upcomingRef] = useAutoAnimate()
 
   useEffect(() => {
@@ -37,8 +39,9 @@ export default function ReviewsPage() {
     await completeReminder(id)
   }, [completeReminder])
 
-  const todayReminders = getTodayReminders()
-  const upcomingReminders = getUpcomingReminders(7)
+  const todayReminders = useMemo(() => getTodayReminders(), [getTodayReminders])
+  const overdueReminders = useMemo(() => getOverdueReminders(), [getOverdueReminders])
+  const upcomingReminders = useMemo(() => getUpcomingReminders(7), [getUpcomingReminders])
   const { streak, rate, total } = getStreakInfo()
 
   const getTaskTitle = (taskId: string) => {
@@ -101,30 +104,64 @@ export default function ReviewsPage() {
           <span className="text-xs text-text-muted font-normal">
             ({todayReminders.length})
           </span>
+          {overdueReminders.length > 0 && (
+            <span className="text-xs text-danger font-normal">
+              +{overdueReminders.length} {t.reviews.overdue.replace('{0}', '')}
+            </span>
+          )}
         </h2>
 
-        {todayReminders.length === 0 ? (
+        {overdueReminders.length > 0 && (
+          <div ref={overdueRef} className="space-y-2 mb-4">
+            {overdueReminders.map((r, i) => (
+              <div key={r.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
+                <Card
+                  className={cn(
+                    'flex items-center gap-3 card-hover',
+                    'border-danger/40 bg-danger/[0.03]'
+                  )}
+                >
+                  <div className="w-8 h-8 rounded-full bg-danger/10 flex items-center justify-center flex-shrink-0">
+                    <AlertTriangle className="w-4 h-4 text-danger" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate text-text">
+                      {getTaskTitle(r.taskId)}
+                    </p>
+                    <p className="text-xs text-text-muted">
+                      {getStageLabel(r.stage)}
+                      <span className="text-danger ml-2">
+                        {getDateLabel(r.reviewDate)}
+                      </span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleComplete(r.id)}
+                    className="px-3 py-1.5 bg-danger text-white text-xs rounded-lg font-medium hover:bg-danger/80 transition flex-shrink-0 animate-check-pop"
+                  >
+                    {t.reviews.completeReview}
+                  </button>
+                </Card>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {todayReminders.length === 0 && overdueReminders.length === 0 ? (
           <EmptyState
             title={t.reviews.noReview}
             description={t.reviews.noReviewHint}
           />
         ) : (
           <div ref={todayRef} className="space-y-2">
-            {todayReminders.map((r, i) => {
-              const overdue = differenceInDays(startOfDay(new Date()), startOfDay(parseISO(r.reviewDate))) > 0
-              return (
-                <div key={r.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
-                  <Card
-                    className={cn(
-                      'flex items-center gap-3 card-hover',
-                      overdue && 'border-danger/30'
-                    )}
-                  >
+            {todayReminders.map((r, i) => (
+              <div key={r.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
+                <Card className="flex items-center gap-3 card-hover">
                   <button
                     onClick={() => handleComplete(r.id)}
-                    className="w-6 h-6 rounded-full border-2 border-border flex items-center justify-center flex-shrink-0 hover:border-success hover:bg-success/10 transition animate-check-pop"
+                    className="w-6 h-6 rounded-full border-2 border-border flex items-center justify-center flex-shrink-0 hover:border-success hover:bg-success/10 transition-colors animate-check-pop"
                   >
-                    <Check className="w-3.5 h-3.5 text-success opacity-0 group-hover:opacity-100" />
+                    <Check className="w-3.5 h-3.5 text-success opacity-0 hover:opacity-100" />
                   </button>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate text-text">
@@ -132,11 +169,6 @@ export default function ReviewsPage() {
                     </p>
                     <p className="text-xs text-text-muted">
                       {getStageLabel(r.stage)}
-                      {overdue && (
-                        <span className="text-danger ml-2">
-                          {getDateLabel(r.reviewDate)}
-                        </span>
-                      )}
                     </p>
                   </div>
                   <button
@@ -146,9 +178,8 @@ export default function ReviewsPage() {
                     {t.reviews.completeReview}
                   </button>
                 </Card>
-                </div>
-              )
-            })}
+              </div>
+            ))}
           </div>
         )}
       </div>

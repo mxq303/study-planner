@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { db } from '@/lib/storage'
 import type { ReviewReminder } from '@/types'
-import { getTodayReminders, getUpcomingReminders, getStreakInfo } from '@/lib/ebbinghaus'
+import { getTodayReminders, getUpcomingReminders, getStreakInfo, getOverdueReminders } from '@/lib/ebbinghaus'
 
 interface ReviewStore {
   reminders: ReviewReminder[]
@@ -9,6 +9,7 @@ interface ReviewStore {
   loadReminders: () => Promise<void>
   completeReminder: (id: string) => Promise<void>
   getTodayReminders: () => ReviewReminder[]
+  getOverdueReminders: () => ReviewReminder[]
   getUpcomingReminders: (days?: number) => ReviewReminder[]
   getStreakInfo: () => { streak: number; total: number; rate: number }
 }
@@ -33,6 +34,8 @@ export const useReviewStore = create<ReviewStore>((set, get) => ({
   },
 
   getTodayReminders: () => getTodayReminders(get().reminders),
+
+  getOverdueReminders: () => getOverdueReminders(get().reminders),
 
   getUpcomingReminders: (days = 7) => getUpcomingReminders(get().reminders, days),
 

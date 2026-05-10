@@ -28,7 +28,12 @@ export function generateReviewReminders(
 
 export function getTodayReminders(reminders: ReviewReminder[]): ReviewReminder[] {
   const today = format(new Date(), 'yyyy-MM-dd')
-  return reminders.filter(r => !r.isCompleted && r.reviewDate <= today)
+  return reminders.filter(r => !r.isCompleted && r.reviewDate === today)
+}
+
+export function getOverdueReminders(reminders: ReviewReminder[]): ReviewReminder[] {
+  const today = format(new Date(), 'yyyy-MM-dd')
+  return reminders.filter(r => !r.isCompleted && r.reviewDate < today)
 }
 
 export function getUpcomingReminders(reminders: ReviewReminder[], days: number = 7): ReviewReminder[] {

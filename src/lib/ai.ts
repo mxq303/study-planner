@@ -32,8 +32,8 @@ export async function decomposeTaskWithAI(
 [{"subtaskTitle":"梳理知识点框架","estimatedMinutes":30,"suggestedPomodoros":1,"strategy":"先通读教材目录，建立知识结构图"}]`
 
   const response = await fetch(
-    `${CF_API_BASE}/accounts/${CF_ACCOUNT_ID}/ai/run/@cf/meta/llama-3-8b-instruct-awq`,
-    {
+      `${CF_API_BASE}/accounts/${CF_ACCOUNT_ID}/ai/run/@cf/meta/llama-3.1-8b-instruct`,
+      {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CF_API_KEY}`,
@@ -78,7 +78,7 @@ export async function suggestTaskDifficulty(
 
   try {
     const response = await fetch(
-      `${CF_API_BASE}/accounts/${CF_ACCOUNT_ID}/ai/run/@cf/meta/llama-3-8b-instruct-awq`,
+      `${CF_API_BASE}/accounts/${CF_ACCOUNT_ID}/ai/run/@cf/meta/llama-3.1-8b-instruct`,
       {
         method: 'POST',
         headers: {

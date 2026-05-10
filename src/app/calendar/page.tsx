@@ -81,15 +81,16 @@ export default function CalendarPage() {
               scheduledDate: slot.date,
               scheduledStart: slot.startTime,
             })
-          } catch {}
+          } catch (err) {
+            console.error(`Failed to update scheduled task ${slot.taskId}:`, err)
+          }
         }
       }
       toast.success(`已生成 ${result.length} 个学习时段`)
-    } catch {
+  } catch (err) {
+      console.error('Failed to generate schedule:', err)
       toast.error('生成失败，请重试')
-    } finally {
-      setGenerating(false)
-    }
+  }
   }
 
   const getSlotsForDate = (date: Date): ScheduleSlot[] => {
@@ -136,7 +137,7 @@ export default function CalendarPage() {
         </div>
 
         <div className="grid grid-cols-7 gap-1">
-          {['一', '二', '三', '四', '五', '六', '日'].map(day => (
+          {[t.stats.monday, t.stats.tuesday, t.stats.wednesday, t.stats.thursday, t.stats.friday, t.stats.saturday, t.stats.sunday].map(day => (
             <div key={day} className="text-center text-[10px] text-text-muted font-medium py-1">
               {day}
             </div>
@@ -195,11 +196,11 @@ export default function CalendarPage() {
       >
         {generating ? (
           <>
-            <Wand2 className="w-4 h-4 animate-pulse" /> {t.schedule.generate}...
+            <Wand2 className="w-4 h-4 animate-spin" /> {t.schedule.generate}...
           </>
         ) : (
           <>
-            <Wand2 className="w-4 h-4" /> {t.schedule.generate}
+            <Wand2 className="w-4 h-4" /> {pendingCount === 0 ? t.tasks.noTasks : t.schedule.generate}
           </>
         )}
       </button>

@@ -21,7 +21,6 @@ export function WhiteNoise() {
     return parseFloat(localStorage.getItem('whitenoise_volume') || '0.5')
   })
   const [showPanel, setShowPanel] = useState(false)
-
   const audioCtxRef = useRef<AudioContext | null>(null)
   const gainRef = useRef<GainNode | null>(null)
   const sourceRef = useRef<AudioBufferSourceNode | null>(null)
@@ -81,18 +80,18 @@ export function WhiteNoise() {
       source.connect(gain)
       source.start()
       sourceRef.current = source
-    } catch {
-      // Audio not supported
+    } catch (err) {
+      console.error('Failed to start noise playback:', err)
     }
   }, [createNoiseBuffer])
 
   const stopNoise = useCallback(() => {
     if (sourceRef.current) {
-      try { sourceRef.current.stop() } catch {}
+      try { sourceRef.current.stop() } catch (err) { console.error('Error stopping noise source:', err) }
       sourceRef.current = null
     }
     if (audioCtxRef.current) {
-      audioCtxRef.current.close()
+      audioCtxRef.current.close().catch(console.error)
       audioCtxRef.current = null
     }
     gainRef.current = null
