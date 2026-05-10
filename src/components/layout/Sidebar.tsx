@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, CheckSquare, Timer, Brain, User, BarChart3, BookOpen, Cloud, CloudOff } from 'lucide-react'
@@ -10,6 +11,15 @@ import { isLoggedIn, getStoredUser } from '@/lib/sync'
 export function Sidebar() {
   const pathname = usePathname()
   const { t } = useI18n()
+  const [loggedIn] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return isLoggedIn()
+  })
+  const [user] = useState<{ id: string; name: string; email: string } | null>(() => {
+    if (typeof window === 'undefined') return null
+    return getStoredUser()
+  })
+
   const items = [
     { href: '/', label: t.nav.home, icon: Home },
     { href: '/tasks', label: t.nav.tasks, icon: CheckSquare },
@@ -18,8 +28,6 @@ export function Sidebar() {
     { href: '/stats', label: t.nav.stats, icon: BarChart3 },
     { href: '/settings', label: t.nav.settings, icon: User },
   ]
-  const loggedIn = typeof window !== 'undefined' && isLoggedIn()
-  const user = typeof window !== 'undefined' ? getStoredUser() : null
 
   return (
     <aside className="hidden md:flex md:flex-col md:fixed md:inset-y-0 md:left-0 md:w-64 card-bg border-r z-40">

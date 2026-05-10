@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/lib/i18n'
 import { isLoggedIn, getStoredUser, logout, pushToCloud, pullFromCloud, getMe } from '@/lib/sync'
@@ -23,11 +23,11 @@ export function DataSection({
     return null
   })
 
-  useState(() => {
+  useEffect(() => {
     if (isLoggedIn()) {
-      getMe().then(u => { if (u) setUser(u) }).catch(() => {})
+      getMe().then(u => { if (u) setUser(u) }).catch(console.error)
     }
-  })
+  }, [])
 
   const handlePush = async () => {
     setSyncLoading(true)

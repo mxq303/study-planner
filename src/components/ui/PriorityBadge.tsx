@@ -1,4 +1,4 @@
-import { cn, getPriorityLabel } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 const priorityColors: Record<number, string> = {
   1: 'bg-gray-100 text-gray-500',
@@ -8,7 +8,7 @@ const priorityColors: Record<number, string> = {
   5: 'bg-red-50 text-red-600',
 }
 
-export function PriorityBadge({ priority, className }: { priority: number; className?: string }) {
+export function PriorityBadge({ priority, label, className }: { priority: number; label?: string; className?: string }) {
   return (
     <span
       className={cn(
@@ -17,7 +17,7 @@ export function PriorityBadge({ priority, className }: { priority: number; class
         className
       )}
     >
-      {getPriorityLabel(priority)}
+      {label || `P${priority}`}
     </span>
   )
 }
