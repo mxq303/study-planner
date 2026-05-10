@@ -24,23 +24,25 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   isLoading: true,
 
   loadTasks: async () => {
-    const tasks = await db.tasks.orderBy('createdAt').reverse().toArray()
+    const tasks = await db.tasks.orderBy('sortOrder').toArray()
     set({ tasks, isLoading: false })
   },
 
   addTask: async (data) => {
     const id = generateId()
     const now = new Date().toISOString()
+    const existingCount = (await db.tasks.count()) || 0
     const task: Task = {
       ...data,
       id,
       status: 'pending',
       isAiDecomposed: false,
+      sortOrder: existingCount,
       createdAt: now,
       updatedAt: now,
     }
     await db.tasks.add(task)
-    const tasks = await db.tasks.orderBy('createdAt').reverse().toArray()
+    const tasks = await db.tasks.orderBy('sortOrder').toArray()
     set({ tasks })
     return id
   },
@@ -48,7 +50,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   updateTask: async (id, data) => {
     const updated = { ...data, updatedAt: new Date().toISOString() }
     await db.tasks.update(id, updated)
-    const tasks = await db.tasks.orderBy('createdAt').reverse().toArray()
+    const tasks = await db.tasks.orderBy('sortOrder').toArray()
     set({ tasks })
   },
 
@@ -57,7 +59,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     await db.tasks.where('parentTaskId').equals(id).delete()
     await db.pomodoroSessions.where('taskId').equals(id).delete()
     await db.reviewReminders.where('taskId').equals(id).delete()
-    const tasks = await db.tasks.orderBy('createdAt').reverse().toArray()
+    const tasks = await db.tasks.orderBy('sortOrder').toArray()
     set({ tasks })
   },
 

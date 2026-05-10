@@ -27,8 +27,6 @@ export default function PomodoroPage() {
     startTimer,
     pauseTimer,
     resumeTimer,
-    tick,
-    completeSession,
     resetTimer,
     getTodaySessions,
     getTodayTotalMinutes,
@@ -54,20 +52,21 @@ export default function PomodoroPage() {
   useEffect(() => {
     if (timer.isRunning) {
       intervalRef.current = setInterval(() => {
-        const completed = tick()
+        const store = usePomodoroStore.getState()
+        const completed = store.tick()
         if (completed) {
           clearTimer()
           toast.success(
             timer.mode === 'focus' ? t.pomodoro.focusComplete : t.pomodoro.breakComplete
           )
-          completeSession()
+          store.completeSession().catch(console.error)
         }
       }, 1000)
     } else {
       clearTimer()
     }
     return clearTimer
-  }, [timer.isRunning, tick, clearTimer, completeSession, timer.mode, t.pomodoro.focusComplete, t.pomodoro.breakComplete])
+  }, [timer.isRunning, clearTimer, timer.mode, t.pomodoro.focusComplete, t.pomodoro.breakComplete])
 
   const progress = timer.totalSeconds > 0
     ? ((timer.totalSeconds - timer.secondsLeft) / timer.totalSeconds) * 100

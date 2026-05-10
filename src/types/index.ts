@@ -28,6 +28,7 @@ export interface Task {
   isAiDecomposed: boolean
   aiSuggestions?: AITaskSuggestion[]
   actualMinutes?: number
+  sortOrder?: number
   completedAt?: string
   createdAt: string
   updatedAt: string

@@ -8,6 +8,7 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useTaskStore } from '@/stores/taskStore'
 import { useSubjectStore } from '@/stores/subjectStore'
+import { db } from '@/lib/storage'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -21,6 +22,21 @@ function getTimeStr(minutes: number, minLabel: string): string {
   if (h === 0) return `${m} ${minLabel}`
   if (m === 0) return `${h}h`
   return `${h}h ${m} ${minLabel}`
+}
+
+const priorityBadgeClass = (priority: number): string => {
+  switch (priority) {
+    case 5:
+      return 'bg-danger/15 text-danger ring-1 ring-danger/20'
+    case 4:
+      return 'bg-warning/15 text-warning ring-1 ring-warning/20'
+    case 3:
+      return 'bg-primary/15 text-primary ring-1 ring-primary/20'
+    case 2:
+      return 'bg-[var(--accent-light)]/15 text-[var(--accent-light)] ring-1 ring-[var(--accent-light)]/20'
+    default:
+      return 'bg-surface-secondary text-text-muted ring-1 ring-border'
+  }
 }
 
 function TaskCard({
@@ -43,7 +59,7 @@ function TaskCard({
       href={`/tasks/${task.id}`}
       className="block"
     >
-      <Card className="card-hover active:scale-[0.98] transition-transform hover:shadow-md">
+      <Card className="card-hover active:scale-[0.98] transition-all duration-200 hover:shadow-md">
         <div className="flex items-start gap-3">
           {task.status === 'completed' ? (
             <CheckCircle2 className="w-5 h-5 text-success mt-0.5 flex-shrink-0" />
@@ -54,13 +70,13 @@ function TaskCard({
                 e.stopPropagation()
                 onComplete()
               }}
-              className="animate-check-pop text-text-muted hover:text-success transition-colors mt-0.5 flex-shrink-0"
+              className="animate-check-pop text-text-muted hover:text-success transition-colors duration-200 mt-0.5 flex-shrink-0"
             >
               <Circle className="w-5 h-5" />
             </button>
           )}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {subject && (
                 <span
                   className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -68,41 +84,37 @@ function TaskCard({
                 />
               )}
               {subject && (
-                <span className="text-xs text-text-muted">{subject.name}</span>
+                <span className="text-xs font-medium text-text-secondary">{subject.name}</span>
               )}
               <span
                 className={cn(
-                  'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium',
-                  task.priority >= 5 ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
-                  task.priority === 4 ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' :
-                  task.priority === 3 ? 'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                  task.priority === 2 ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-                  'bg-surface text-text-muted'
+                  'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide',
+                  priorityBadgeClass(task.priority)
                 )}
               >
                 {priorityLabels[task.priority - 1] || priorityLabels[2]}
               </span>
             </div>
             <p className={cn(
-              'text-sm font-medium mt-1',
+              'text-sm font-semibold mt-1.5 leading-snug',
               task.status === 'completed' && 'line-through text-text-muted'
             )}>
               {task.title}
             </p>
-            <div className="flex items-center gap-3 mt-2 text-xs text-text-muted">
+            <div className="flex items-center gap-3 mt-2.5 text-xs text-text-muted">
               <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" /> {getTimeStr(task.estimatedMinutes, minutesLabel)}
+                <Clock className="w-3.5 h-3.5" /> {getTimeStr(task.estimatedMinutes, minutesLabel)}
               </span>
               {task.deadline && (
                 <span className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" /> {format(new Date(task.deadline), 'M/d')}
+                  <Calendar className="w-3.5 h-3.5" /> {format(new Date(task.deadline), 'M/d')}
                 </span>
               )}
               <span className={cn(
-                'px-1.5 py-0.5 rounded text-[10px]',
+                'px-1.5 py-0.5 rounded-md text-[10px] font-medium',
                 task.status === 'completed' ? 'bg-success/10 text-success' :
                 task.status === 'in_progress' ? 'bg-primary/10 text-primary' :
-                'bg-surface text-text-muted'
+                'bg-surface-secondary text-text-muted'
               )}>
                 {statusLabel}
               </span>
@@ -128,7 +140,19 @@ export default function TasksPage() {
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return
-    console.log('Moved from', result.source.index, 'to', result.destination.index)
+    if (result.source.index === result.destination.index) return
+
+    const reordered = Array.from(tasks)
+    const [moved] = reordered.splice(result.source.index, 1)
+    reordered.splice(result.destination.index, 0, moved)
+
+    const updated = reordered.map((task, index) => ({ ...task, sortOrder: index }))
+
+    updated.forEach((task) => {
+      db.tasks.update(task.id, { sortOrder: task.sortOrder }).catch(console.error)
+    })
+
+    useTaskStore.setState({ tasks: updated })
   }
 
   const STATUS_TABS: { key: TaskStatus | 'all'; label: string }[] = [
@@ -158,28 +182,31 @@ export default function TasksPage() {
         action={
           <Link
             href="/tasks/new"
-            className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center active:scale-95 transition-transform"
+            className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center active:scale-95 transition-all duration-200 hover:shadow-md hover:brightness-105"
           >
             <Plus className="w-5 h-5" />
           </Link>
         }
       />
 
-      <div className="flex gap-1 p-1 card-bg rounded-xl border border-border mb-4 overflow-x-auto scrollbar-hide">
+      <div className="flex gap-1 p-1 bg-surface-secondary/60 rounded-xl border border-border mb-5 overflow-x-auto scrollbar-hide">
         {STATUS_TABS.map(tab => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={cn(
-              'animate-scale-in flex-1 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
+              'animate-scale-in flex-1 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200',
               activeTab === tab.key
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-text-muted hover:text-text'
+                ? 'bg-primary text-white shadow-sm ring-1 ring-primary/30'
+                : 'text-text-muted hover:text-text hover:bg-surface'
             )}
           >
             {tab.label}
             {tab.key !== 'all' && (
-              <span className="ml-1 text-xs opacity-70">
+              <span className={cn(
+                'ml-1 text-xs',
+                activeTab === tab.key ? 'opacity-80' : 'opacity-60'
+              )}>
                 ({tasks.filter(t => tab.key === 'all' ? true : t.status === tab.key).length})
               </span>
             )}
@@ -195,7 +222,7 @@ export default function TasksPage() {
             activeTab === 'all' ? (
               <Link
                 href="/tasks/new"
-                className="inline-flex items-center gap-1 text-xs text-white bg-primary px-4 py-2 rounded-full font-medium"
+                className="inline-flex items-center gap-1.5 text-xs text-white bg-primary px-4 py-2.5 rounded-full font-medium transition-all duration-200 hover:shadow-md hover:brightness-105 active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" /> {t.tasks.add}
               </Link>
@@ -206,18 +233,26 @@ export default function TasksPage() {
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="task-list">
             {(provided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
+              <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2.5">
                 {filteredTasks.map((task, index) => (
                   <Draggable key={task.id} draggableId={task.id} index={index}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className={snapshot.isDragging ? 'opacity-80 shadow-lg rounded-xl' : ''}
+                        className={cn(
+                          'transition-all duration-200',
+                          snapshot.isDragging && 'opacity-90'
+                        )}
                       >
                         <div className="flex items-center gap-1">
-                          <div {...provided.dragHandleProps} className="p-2 text-text-muted hover:text-text cursor-grab active:cursor-grabbing">
-                            <GripVertical className="w-4 h-4" />
+                          <div
+                            {...provided.dragHandleProps}
+                            className="p-2 -ml-1 text-text-muted/60 hover:text-text cursor-grab active:cursor-grabbing transition-colors duration-150 touch-manipulation"
+                            role="button"
+                            aria-label="Drag to reorder"
+                          >
+                            <GripVertical className="w-5 h-5" />
                           </div>
                           <div className="flex-1">
                             <TaskCard
@@ -240,7 +275,7 @@ export default function TasksPage() {
           </Droppable>
         </DragDropContext>
       ) : (
-        <div ref={listRef} className="space-y-2">
+        <div ref={listRef} className="space-y-2.5">
           {filteredTasks.map((task, i) => (
             <div key={task.id} className={`animate-slide-up stagger-${(i % 8) + 1}`}>
               <TaskCard

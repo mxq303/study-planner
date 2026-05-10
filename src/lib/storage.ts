@@ -17,6 +17,9 @@ class StudyPlannerDB extends Dexie {
       reviewReminders: 'id, taskId, reviewDate, isCompleted, stage',
       userPreferences: 'id',
     })
+    this.version(2).stores({
+      tasks: 'id, subjectId, status, scheduledDate, deadline, priority, createdAt, sortOrder',
+    })
   }
 }
 
